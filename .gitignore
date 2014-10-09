@@ -1,3 +1,4 @@
 *.[eo]*
 *.tar.gz
 *.pyc
+venv
