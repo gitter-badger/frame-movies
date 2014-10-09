@@ -100,7 +100,7 @@ def main(args):
         pool.map(partial(build_image, outdir=image_dir),
                  enumerate(sorted_files))
 
-        pack_images(image_dir, 'plots.tar.gz')
+        pack_images(image_dir, args.output)
 
 
 def parse_args():
