@@ -53,6 +53,8 @@ def build_image((i, input_fname), outdir, frame_min=0.8, frame_max=1.2):
     z1, z2 = (med_image * frame_min, med_image * frame_max)
     axis.imshow(image_data, interpolation='None', origin='lower',
                 cmap=plt.cm.afmhot, vmin=z1, vmax=z2)
+    for dimension in ['xaxis', 'yaxis']:
+        getattr(axis, dimension).set_visible(False)
     fig.tight_layout()
     fig.savefig(output_fname, bbox_inches='tight')
     plt.close(fig)
