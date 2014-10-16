@@ -11,7 +11,7 @@ verify_args() {
 }
 
 submit() {
-    echo "$@" | qsub -S /bin/bash -cwd -sync n -pe parallel 24 -N build-images
+    echo "$@" | qsub -S /bin/bash -cwd -sync y -pe parallel 24 -N build-images
 }
 
 build_images() {
