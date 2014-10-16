@@ -8,7 +8,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import os
-from multiprocessing import Pool
+import multiprocessing as mp
 import tempfile
 from contextlib import contextmanager
 from functools import partial
@@ -98,7 +98,7 @@ def main(args):
 
         sorted_files = sort_images(files)
 
-        pool = Pool()
+        pool = mp.Pool()
         pool.map(partial(build_image, outdir=image_dir),
                  enumerate(sorted_files))
 
