@@ -93,6 +93,7 @@ def change_directory(path):
 
 def main(args):
     files = args.filename
+    output_filename = os.path.realpath(args.output)
     print('Building {} files'.format(len(files)))
 
     with temporary_directory() as image_dir:
@@ -104,14 +105,17 @@ def main(args):
         pool.map(partial(build_image, outdir=image_dir),
                  enumerate(sorted_files))
 
-        pack_images(image_dir, args.output)
+        print('Making movie {}'.format(output_filename))
+        generate_movie(image_dir, output_filename, fps=args.fps)
 
 
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('filename', nargs='+')
-    parser.add_argument('-o', '--output', help="Output tarball name",
-                        required=False, default='plots.tar.gz')
+    parser.add_argument('-o', '--output', help="Output movie name",
+                        required=False, default='output.mp4')
+    parser.add_argument('-f', '--fps', help='Frames per second',
+                        required=False, default=15, type=int)
     return parser.parse_args()
 
 
