@@ -62,14 +62,16 @@ def build_image((i, input_fname), outdir, frame_min=0.8, frame_max=1.2):
 def sort_images(images):
     return sorted(images, key=lambda fname: fitsio.read_header(fname)['mjd'])
 
-def generate_movie(image_directory, output_filename, fps):
-    cmd = map(str, ['mencoder', 'mf://{}/*.png'.format(image_directory),
-                    '-mf', 'w=800:h=800:fps={}:type=png'.format(fps),
-                    '-ovc', 'lavc',
-                    '-lavcopts', 'vcodec=mpeg4:mbd=2:turbo',
-                    '-o', output_filename,
-                    ])
-    print(' '.join(cmd))
+def generate_movie(image_directory, output_filename, fps=15):
+    n_cpu = mp.cpu_count()
+    with change_directory(image_directory):
+        cmd = ['mencoder', 'mf://*.png', '-mf',
+               'w=800:h=600:fps={}:type=png'.format(fps),
+                '-ovc', 'x264', '-x264encopts',
+                'crf=18:nofast_pskip:nodct_decimate:nocabac:global_header:threads={}'.format(n_cpu),
+                '-of', 'lavf', '-lavfopts', 'format=mp4',
+                '-o', output_filename]
+        sp.check_call(cmd)
 
 @contextmanager
 def temporary_directory(*args, **kwargs):
