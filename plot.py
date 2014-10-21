@@ -15,9 +15,12 @@ from functools import partial
 import fitsio
 import subprocess as sp
 import shutil
+import sys
 import numpy as np
+import logging
 
-logger = mp.get_logger()
+logger = mp.log_to_stderr()
+logger.setLevel(logging.INFO)
 
 class NullPool(object):
     def __init__(self, *args, **kwargs): pass
