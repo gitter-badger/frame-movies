@@ -54,6 +54,7 @@ def build_image((i, input_fname), outdir, frame_min=0.8, frame_max=1.2):
     fig, axis = plt.subplots(figsize=(8, 8))
     with fitsio.FITS(input_fname) as infile:
         image_data = infile[0].read()
+        header = infile[0].read_header()
 
     if image_data.shape == (2048, 2088):
         overscan = image_data[4:, -15:].mean()
@@ -68,6 +69,7 @@ def build_image((i, input_fname), outdir, frame_min=0.8, frame_max=1.2):
                 cmap=plt.cm.afmhot, vmin=z1, vmax=z2)
     for dimension in ['xaxis', 'yaxis']:
         getattr(axis, dimension).set_visible(False)
+    axis.set_title(header['image_id'])
     fig.tight_layout()
     fig.savefig(output_fname, bbox_inches='tight')
     plt.close(fig)
