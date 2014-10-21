@@ -17,6 +17,8 @@ import subprocess as sp
 import shutil
 import numpy as np
 
+logger = mp.get_logger()
+
 class NullPool(object):
     def __init__(self, *args, **kwargs): pass
 
@@ -30,7 +32,7 @@ def pack_images(dirname, output_name, kind='png'):
         cmd.extend([fname for fname in os.listdir('.')
                     if '.png' in fname])
         str_cmd = map(str, cmd)
-        print("Running command [{}]".format(' '.join(str_cmd)))
+        logger.debug("Running command [{}]".format(' '.join(str_cmd)))
         sp.check_call(str_cmd)
 
 
@@ -39,10 +41,11 @@ def build_image((i, input_fname), outdir, frame_min=0.8, frame_max=1.2):
                                 '{:05d}_{}.png'.format(
                                     i,
                                     os.path.basename(input_fname)))
+    logger.debug('Building image {} => {}'.format(input_fname,
+                                                  output_fname))
 
-    print("Building {}".format(output_fname))
     if os.path.isfile(output_fname):
-        print("Image exists, skipping")
+        logger.debug("Image {} exists, skipping".format(output_fname))
         return
 
     fig, axis = plt.subplots(figsize=(8, 8))
@@ -60,9 +63,13 @@ def build_image((i, input_fname), outdir, frame_min=0.8, frame_max=1.2):
     plt.close(fig)
 
 def sort_images(images):
+    logger.info('Sorting images by mjd')
     return sorted(images, key=lambda fname: fitsio.read_header(fname)['mjd'])
 
 def generate_movie(image_directory, output_filename, fps=15):
+    logger.info('Building movie file {}, fps {}'.format(
+        output_filename, fps)
+    )
     n_cpu = mp.cpu_count()
     with change_directory(image_directory):
         cmd = ['mencoder', 'mf://*.png', '-mf',
@@ -85,7 +92,7 @@ def temporary_directory(*args, **kwargs):
 def change_directory(path):
     old_cwd = os.getcwd()
     try:
-        print("Changing directory to {}".format(path))
+        logger.debug("Changing directory to {}".format(path))
         os.chdir(path)
         yield path
     finally:
@@ -94,10 +101,10 @@ def change_directory(path):
 def main(args):
     files = args.filename
     output_filename = os.path.realpath(args.output)
-    print('Building {} files'.format(len(files)))
+    logger.info('Building {} files'.format(len(files)))
 
     with temporary_directory() as image_dir:
-        print("Building into {}".format(image_dir))
+        logger.info("Building into {}".format(image_dir))
 
         sorted_files = sort_images(files)
 
@@ -105,7 +112,6 @@ def main(args):
         pool.map(partial(build_image, outdir=image_dir),
                  enumerate(sorted_files))
 
-        print('Making movie {}'.format(output_filename))
         generate_movie(image_dir, output_filename, fps=args.fps)
 
 
