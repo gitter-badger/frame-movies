@@ -63,6 +63,7 @@ def build_image((i, input_fname), outdir, frame_min=0.8, frame_max=1.2):
         )
         image_data = image_data[:, 20:-20] - overscan
 
+    image_data /= header['exposure']
     med_image = np.median(image_data)
     z1, z2 = (med_image * frame_min, med_image * frame_max)
     axis.imshow(image_data, interpolation='None', origin='lower',
