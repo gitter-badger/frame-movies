@@ -52,6 +52,13 @@ def build_image((i, input_fname), outdir, frame_min=0.8, frame_max=1.2):
     with fitsio.FITS(input_fname) as infile:
         image_data = infile[0].read()
 
+    if image_data.shape == (2048, 2088):
+        overscan = image_data[4:, -15:].mean()
+        logger.warning('Image is raw, subtracting overscan {}'.format(
+            overscan)
+        )
+        image_data = image_data[:, 20:-20] - overscan
+
     med_image = np.median(image_data)
     z1, z2 = (med_image * frame_min, med_image * frame_max)
     axis.imshow(image_data, interpolation='None', origin='lower',
