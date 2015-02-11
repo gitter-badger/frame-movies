@@ -17,7 +17,12 @@ submit() {
 build_images() {
     local directory="$1"
     local output_name="$2"
-    echo /home/sw/anaconda/bin/python ./plot.py -o ${output_name} "${directory}/*.fits"
+    echo /home/sw/anaconda/bin/python ./plot.py -o ${output_name} "$(getfiles ${directory})"
+}
+
+getfiles() {
+    local directory="$1"
+    ls ${directory}/proc*.fits | grep -v skybkgmap
 }
 
 main() {
