@@ -120,7 +120,7 @@ def main(args):
 
         sorted_files = sort_images(files)
 
-        pool = mp.Pool()
+        pool = mp.Pool() if not args.no_multiprocessing else NullPool()
         pool.map(partial(build_image, outdir=image_dir),
                  enumerate(sorted_files))
 
@@ -134,6 +134,8 @@ def parse_args():
                         required=False, default='output.mp4')
     parser.add_argument('-f', '--fps', help='Frames per second',
                         required=False, default=15, type=int)
+    parser.add_argument('--no-multiprocessing', help='Run serially',
+            action='store_true', default=False)
     return parser.parse_args()
 
 
