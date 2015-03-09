@@ -53,7 +53,8 @@ def extract_image_data(input_fname):
 
     return header, image_data
 
-def build_image((i, input_fname), outdir, frame_min=0.8, frame_max=1.2):
+def build_image((i, input_fname), outdir, median_behaviour,
+        frame_min=0.8, frame_max=1.2):
     output_fname = os.path.join(outdir,
                                 '{:05d}_{}.png'.format(
                                     i,
@@ -65,15 +66,19 @@ def build_image((i, input_fname), outdir, frame_min=0.8, frame_max=1.2):
         logger.debug("Image {} exists, skipping".format(output_fname))
         return
 
-    fig, axis = plt.subplots(figsize=(8, 8))
+    fig, axes = plt.subplots(2, 1, figsize=(8, 8),
+            gridspec_kw={'height_ratios': [0.8, 0.2]})
     header, image_data = extract_image_data(input_fname)
     med_image = np.median(image_data)
     z1, z2 = (med_image * frame_min, med_image * frame_max)
-    axis.imshow(image_data, interpolation='None', origin='lower',
+    axes[0].imshow(image_data, interpolation='None', origin='lower',
                 cmap=plt.cm.afmhot, vmin=z1, vmax=z2)
     for dimension in ['xaxis', 'yaxis']:
-        getattr(axis, dimension).set_visible(False)
-    axis.set_title(header.get('image_id', None))
+        getattr(axes[0], dimension).set_visible(False)
+    axes[0].set_title(header.get('image_id', None))
+    median_behaviour.plot(axes[1])
+    median_behaviour.add_vline(axes[1], i)
+
     fig.tight_layout()
     fig.savefig(output_fname, bbox_inches='tight')
     plt.close(fig)
@@ -114,6 +119,44 @@ def change_directory(path):
     finally:
         os.chdir(old_cwd)
 
+
+class TimeSeries(object):
+    def __init__(self, x, y):
+        self.x, self.y = x, y
+        self.mjd0 = int(self.x.min())
+        self.x -= self.mjd0
+
+    @classmethod
+    def extract_from(cls, files):
+        x = np.zeros(len(files))
+        y = np.zeros(len(files))
+
+        for i, fname in enumerate(files):
+            header, image_data = extract_image_data(fname)
+            med_image = np.median(image_data)
+            x[i] = header['mjd']
+            y[i] = med_image
+
+        return cls(x, y)
+
+
+    @property
+    def ylims(self):
+        '''
+        Return the quartiles
+        '''
+        return np.percentile(self.y, [2.5, 97.5])
+
+    def plot(self, axis):
+        axis.plot(self.x, self.y, '.')
+        axis.set_ylim(*self.ylims)
+        axis.set_xlabel('MJD - {}'.format(self.mjd0))
+        axis.set_ylabel(r'Image median / ADU')
+
+    def add_vline(self, axis, index):
+        axis.axvline(self.x[index], color='k', ls='--')
+
+
 def main(args):
     files = args.filename
     output_filename = os.path.realpath(args.output)
@@ -123,9 +166,13 @@ def main(args):
         logger.info("Building into {}".format(image_dir))
 
         sorted_files = sort_images(files)
+        logger.info('Extracting time series from data')
+        median_behaviour = TimeSeries.extract_from(sorted_files)
 
+        logger.info('Building movie images')
         pool = mp.Pool() if not args.no_multiprocessing else NullPool()
-        pool.map(partial(build_image, outdir=image_dir),
+        pool.map(partial(build_image, outdir=image_dir,
+            median_behaviour=median_behaviour),
                  enumerate(sorted_files))
 
         generate_movie(image_dir, output_filename, fps=args.fps)
