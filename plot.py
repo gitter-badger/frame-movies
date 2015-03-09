@@ -39,6 +39,20 @@ def pack_images(dirname, output_name, kind='png'):
         sp.check_call(str_cmd)
 
 
+def extract_image_data(input_fname):
+    with fitsio.FITS(input_fname) as infile:
+        image_data = infile[0].read()
+        header = infile[0].read_header()
+
+    if image_data.shape == (2048, 2088):
+        overscan = image_data[4:, -15:].mean()
+        logger.warning('Image is raw, subtracting overscan {}'.format(
+            overscan)
+        )
+        image_data = image_data[:, 20:-20] - overscan
+
+    return header, image_data
+
 def build_image((i, input_fname), outdir, frame_min=0.8, frame_max=1.2):
     output_fname = os.path.join(outdir,
                                 '{:05d}_{}.png'.format(
@@ -52,17 +66,7 @@ def build_image((i, input_fname), outdir, frame_min=0.8, frame_max=1.2):
         return
 
     fig, axis = plt.subplots(figsize=(8, 8))
-    with fitsio.FITS(input_fname) as infile:
-        image_data = infile[0].read()
-        header = infile[0].read_header()
-
-    if image_data.shape == (2048, 2088):
-        overscan = image_data[4:, -15:].mean()
-        logger.warning('Image is raw, subtracting overscan {}'.format(
-            overscan)
-        )
-        image_data = image_data[:, 20:-20] - overscan
-
+    header, image_data = extract_image_data(input_fname)
     med_image = np.median(image_data)
     z1, z2 = (med_image * frame_min, med_image * frame_max)
     axis.imshow(image_data, interpolation='None', origin='lower',
