@@ -102,12 +102,13 @@ def generate_movie(image_directory, output_filename, fps=15):
         sp.check_call(cmd)
 
 @contextmanager
-def temporary_directory(*args, **kwargs):
+def temporary_directory(delete=False, *args, **kwargs):
     dirname = tempfile.mkdtemp(*args, **kwargs)
     try:
         yield dirname
     finally:
-        shutil.rmtree(dirname)
+        if delete:
+            shutil.rmtree(dirname)
 
 @contextmanager
 def change_directory(path):
