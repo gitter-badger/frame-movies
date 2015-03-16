@@ -17,7 +17,7 @@ submit() {
 build_images() {
     local directory="$1"
     local output_name="$2"
-    echo /home/sw/anaconda/bin/python ./plot.py -o ${output_name} "$(getfiles ${directory})"
+    echo /home/sw/anaconda/bin/python ./create_images.py -o ${output_name} "$(getfiles ${directory})"
 }
 
 getfiles() {
