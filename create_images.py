@@ -19,8 +19,11 @@ import sys
 import numpy as np
 import logging
 
-logger = mp.log_to_stderr()
-logger.setLevel(logging.INFO)
+logging.basicConfig(level='INFO', format='%(levelname)10s - %(message)s')
+logger = logging.getLogger(__file__)
+
+mplogger = mp.log_to_stderr()
+mplogger.setLevel('WARNING')
 
 
 class NullPool(object):
