@@ -113,13 +113,16 @@ def generate_movie(image_directory, output_filename, fps=15):
 
 
 @contextmanager
-def temporary_directory(delete=False, *args, **kwargs):
-    dirname = tempfile.mkdtemp(*args, **kwargs)
-    try:
-        yield dirname
-    finally:
-        if delete:
-            shutil.rmtree(dirname)
+def temporary_directory(images_dir=None, delete=False, *args, **kwargs):
+    if images_dir is not None:
+        yield images_dir
+    else:
+        dirname = tempfile.mkdtemp(*args, **kwargs)
+        try:
+            yield dirname
+        finally:
+            if delete:
+                shutil.rmtree(dirname)
 
 
 @contextmanager
@@ -176,7 +179,7 @@ def main(args):
     if args.output is None:
         logger.warning('Not creating movie')
 
-    with temporary_directory() as image_dir:
+    with temporary_directory(args.images_dir) as image_dir:
         logger.info("Building into {}".format(image_dir))
 
         if args.no_sort:
