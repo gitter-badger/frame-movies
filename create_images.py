@@ -169,8 +169,9 @@ class TimeSeries(object):
 
 def main(args):
     files = args.filename
-    output_filename = os.path.realpath(args.output)
     logger.info('Building {} files'.format(len(files)))
+    if args.output is None:
+        logger.warning('Not creating movie')
 
     with temporary_directory() as image_dir:
         logger.info("Building into {}".format(image_dir))
@@ -185,14 +186,16 @@ def main(args):
                          median_behaviour=median_behaviour),
                  enumerate(sorted_files))
 
-        generate_movie(image_dir, output_filename, fps=args.fps)
+        if args.output is not None:
+            output_filename = os.path.realpath(args.output)
+            generate_movie(image_dir, output_filename, fps=args.fps)
 
 
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('filename', nargs='+')
     parser.add_argument('-o', '--output', help="Output movie name",
-                        required=False, default='output.mp4')
+                        required=False)
     parser.add_argument('--no-sort', action='store_true', default=False,
                         help='Do not sort by mjd')
     parser.add_argument('-f', '--fps', help='Frames per second',
