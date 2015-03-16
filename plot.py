@@ -22,11 +22,14 @@ import logging
 logger = mp.log_to_stderr()
 logger.setLevel(logging.INFO)
 
+
 class NullPool(object):
+
     def __init__(self, *args, **kwargs): pass
 
     def map(self, fn, args):
         return map(fn, args)
+
 
 def pack_images(dirname, output_name, kind='png'):
     full_out_path = os.path.realpath(output_name)
@@ -53,8 +56,9 @@ def extract_image_data(input_fname):
 
     return header, image_data
 
+
 def build_image((i, input_fname), outdir, median_behaviour,
-        frame_min=0.8, frame_max=1.2):
+                frame_min=0.8, frame_max=1.2):
     output_fname = os.path.join(outdir,
                                 '{:05d}_{}.png'.format(
                                     i,
@@ -67,12 +71,12 @@ def build_image((i, input_fname), outdir, median_behaviour,
         return
 
     fig, axes = plt.subplots(2, 1, figsize=(8, 8),
-            gridspec_kw={'height_ratios': [0.8, 0.2]})
+                             gridspec_kw={'height_ratios': [0.8, 0.2]})
     header, image_data = extract_image_data(input_fname)
     med_image = np.median(image_data)
     z1, z2 = (med_image * frame_min, med_image * frame_max)
     axes[0].imshow(image_data, interpolation='None', origin='lower',
-                cmap=plt.cm.afmhot, vmin=z1, vmax=z2)
+                   cmap=plt.cm.afmhot, vmin=z1, vmax=z2)
     for dimension in ['xaxis', 'yaxis']:
         getattr(axes[0], dimension).set_visible(False)
     axes[0].set_title(header.get('image_id', None))
@@ -83,9 +87,11 @@ def build_image((i, input_fname), outdir, median_behaviour,
     fig.savefig(output_fname, bbox_inches='tight')
     plt.close(fig)
 
+
 def sort_images(images):
     logger.info('Sorting images by mjd')
     return sorted(images, key=lambda fname: fitsio.read_header(fname)['mjd'])
+
 
 def generate_movie(image_directory, output_filename, fps=15):
     logger.info('Building movie file {}, fps {}'.format(
@@ -95,11 +101,13 @@ def generate_movie(image_directory, output_filename, fps=15):
     with change_directory(image_directory):
         cmd = ['mencoder', 'mf://*.png', '-mf',
                'w=800:h=600:fps={}:type=png'.format(fps),
-                '-ovc', 'x264', '-x264encopts',
-                'crf=18:nofast_pskip:nodct_decimate:nocabac:global_header:threads={}'.format(n_cpu),
-                '-of', 'lavf', '-lavfopts', 'format=mp4',
-                '-o', output_filename]
+               '-ovc', 'x264', '-x264encopts',
+               'crf=18:nofast_pskip:nodct_decimate:nocabac:global_header:threads={}'.format(
+                   n_cpu),
+               '-of', 'lavf', '-lavfopts', 'format=mp4',
+               '-o', output_filename]
         sp.check_call(cmd)
+
 
 @contextmanager
 def temporary_directory(delete=False, *args, **kwargs):
@@ -109,6 +117,7 @@ def temporary_directory(delete=False, *args, **kwargs):
     finally:
         if delete:
             shutil.rmtree(dirname)
+
 
 @contextmanager
 def change_directory(path):
@@ -122,6 +131,7 @@ def change_directory(path):
 
 
 class TimeSeries(object):
+
     def __init__(self, x, y):
         self.x, self.y = x, y
         self.mjd0 = int(self.x.min())
@@ -139,7 +149,6 @@ class TimeSeries(object):
             y[i] = med_image
 
         return cls(x, y)
-
 
     @property
     def ylims(self):
@@ -173,7 +182,7 @@ def main(args):
         logger.info('Building movie images')
         pool = mp.Pool() if not args.no_multiprocessing else NullPool()
         pool.map(partial(build_image, outdir=image_dir,
-            median_behaviour=median_behaviour),
+                         median_behaviour=median_behaviour),
                  enumerate(sorted_files))
 
         generate_movie(image_dir, output_filename, fps=args.fps)
@@ -185,7 +194,7 @@ def parse_args():
     parser.add_argument('-o', '--output', help="Output movie name",
                         required=False, default='output.mp4')
     parser.add_argument('--no-sort', action='store_true', default=False,
-            help='Do not sort by mjd')
+                        help='Do not sort by mjd')
     parser.add_argument('-f', '--fps', help='Frames per second',
                         required=False, default=15, type=int)
     parser.add_argument('--no-multiprocessing', help='Run serially',
