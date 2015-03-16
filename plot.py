@@ -166,7 +166,7 @@ def main(args):
     with temporary_directory() as image_dir:
         logger.info("Building into {}".format(image_dir))
 
-        sorted_files = sort_images(files)
+        sorted_files = files if args.no_sort else sort_images(files)
         logger.info('Extracting time series from data')
         median_behaviour = TimeSeries.extract_from(sorted_files)
 
@@ -184,6 +184,8 @@ def parse_args():
     parser.add_argument('filename', nargs='+')
     parser.add_argument('-o', '--output', help="Output movie name",
                         required=False, default='output.mp4')
+    parser.add_argument('--no-sort', action='store_true', default=False,
+            help='Do not sort by mjd')
     parser.add_argument('-f', '--fps', help='Frames per second',
                         required=False, default=15, type=int)
     parser.add_argument('--no-multiprocessing', help='Run serially',
