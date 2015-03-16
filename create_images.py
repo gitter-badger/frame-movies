@@ -190,9 +190,9 @@ def main(args):
 
         logger.info('Building movie images')
         pool = mp.Pool() if not args.no_multiprocessing else NullPool()
-        pool.map(partial(build_image, outdir=image_dir,
-                         median_behaviour=median_behaviour),
-                 enumerate(sorted_files))
+        fn = partial(build_image, outdir=image_dir,
+                     median_behaviour=median_behaviour)
+        pool.map(fn, enumerate(sorted_files))
 
         if args.output is not None:
             output_filename = os.path.realpath(args.output)
