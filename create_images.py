@@ -113,7 +113,7 @@ def generate_movie(image_directory, output_filename, fps=15):
 
 
 @contextmanager
-def temporary_directory(images_dir=None, delete=False, *args, **kwargs):
+def temporary_directory(images_dir=None, delete=True, *args, **kwargs):
     if images_dir is not None:
         yield images_dir
     else:
@@ -179,7 +179,8 @@ def main(args):
     if args.output is None:
         logger.warning('Not creating movie')
 
-    with temporary_directory(args.images_dir) as image_dir:
+    delete = not args.no_delete_tmpdir
+    with temporary_directory(args.images_dir, delete=delete) as image_dir:
         logger.info("Building into {}".format(image_dir))
 
         if args.no_sort:
@@ -215,6 +216,9 @@ def parse_args():
                         action='store_true', default=False)
     parser.add_argument('-d', '--images-dir', required=False,
                         help='Custom directory to put the intermediate images')
+    parser.add_argument('--no-delete-tmpdir', action='store_true',
+                        default=False,
+                        help='Do not delete temporary directory of pngs')
     return parser.parse_args()
 
 
