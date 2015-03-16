@@ -199,6 +199,8 @@ def parse_args():
                         required=False, default=15, type=int)
     parser.add_argument('--no-multiprocessing', help='Run serially',
             action='store_true', default=False)
+    parser.add_argument('-d', '--images-dir', required=False,
+            help='Custom directory to put the intermediate images')
     return parser.parse_args()
 
 
