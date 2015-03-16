@@ -2,7 +2,7 @@
 
 This code takes a series of FITS files on the command line and spits out a `.mp4`.
 
-It automatically scales the images to $$$\pm 20\%$$$ around the median and plots a time series of the median values as a function of time. Above the image is the `image_id` if present.
+It automatically scales the images to `+=20%` around the median and plots a time series of the median values as a function of time. Above the image is the `image_id` if present.
 
 If the images have the shape `2048x2088` then the image is assumed to be raw and the overscan strips are removed. Otherwise they are not.
 
