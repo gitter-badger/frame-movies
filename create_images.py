@@ -176,7 +176,12 @@ def main(args):
     with temporary_directory() as image_dir:
         logger.info("Building into {}".format(image_dir))
 
-        sorted_files = files if args.no_sort else sort_images(files)
+        if args.no_sort:
+            logger.warning('Not sorting images')
+            sorted_files = files
+        else:
+            sorted_files = sort_images(files)
+
         logger.info('Extracting time series from data')
         median_behaviour = TimeSeries.extract_from(sorted_files)
 
