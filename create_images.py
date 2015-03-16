@@ -201,9 +201,9 @@ def parse_args():
     parser.add_argument('-f', '--fps', help='Frames per second',
                         required=False, default=15, type=int)
     parser.add_argument('--no-multiprocessing', help='Run serially',
-            action='store_true', default=False)
+                        action='store_true', default=False)
     parser.add_argument('-d', '--images-dir', required=False,
-            help='Custom directory to put the intermediate images')
+                        help='Custom directory to put the intermediate images')
     return parser.parse_args()
 
 
