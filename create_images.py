@@ -19,8 +19,11 @@ import sys
 import numpy as np
 import logging
 
-logger = mp.log_to_stderr()
-logger.setLevel(logging.INFO)
+logging.basicConfig(level='INFO', format='%(levelname)10s - %(message)s')
+logger = logging.getLogger(__file__)
+
+mplogger = mp.log_to_stderr()
+mplogger.setLevel('WARNING')
 
 
 class NullPool(object):
@@ -110,13 +113,16 @@ def generate_movie(image_directory, output_filename, fps=15):
 
 
 @contextmanager
-def temporary_directory(delete=False, *args, **kwargs):
-    dirname = tempfile.mkdtemp(*args, **kwargs)
-    try:
-        yield dirname
-    finally:
-        if delete:
-            shutil.rmtree(dirname)
+def temporary_directory(images_dir=None, delete=True, *args, **kwargs):
+    if images_dir is not None:
+        yield images_dir
+    else:
+        dirname = tempfile.mkdtemp(*args, **kwargs)
+        try:
+            yield dirname
+        finally:
+            if delete:
+                shutil.rmtree(dirname)
 
 
 @contextmanager
@@ -169,36 +175,50 @@ class TimeSeries(object):
 
 def main(args):
     files = args.filename
-    output_filename = os.path.realpath(args.output)
     logger.info('Building {} files'.format(len(files)))
+    if args.output is None:
+        logger.warning('Not creating movie')
 
-    with temporary_directory() as image_dir:
+    delete = not args.no_delete_tmpdir
+    with temporary_directory(args.images_dir, delete=delete) as image_dir:
         logger.info("Building into {}".format(image_dir))
 
-        sorted_files = files if args.no_sort else sort_images(files)
+        if args.no_sort:
+            logger.warning('Not sorting images')
+            sorted_files = files
+        else:
+            sorted_files = sort_images(files)
+
         logger.info('Extracting time series from data')
         median_behaviour = TimeSeries.extract_from(sorted_files)
 
         logger.info('Building movie images')
         pool = mp.Pool() if not args.no_multiprocessing else NullPool()
-        pool.map(partial(build_image, outdir=image_dir,
-                         median_behaviour=median_behaviour),
-                 enumerate(sorted_files))
+        fn = partial(build_image, outdir=image_dir,
+                     median_behaviour=median_behaviour)
+        pool.map(fn, enumerate(sorted_files))
 
-        generate_movie(image_dir, output_filename, fps=args.fps)
+        if args.output is not None:
+            output_filename = os.path.realpath(args.output)
+            generate_movie(image_dir, output_filename, fps=args.fps)
 
 
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('filename', nargs='+')
     parser.add_argument('-o', '--output', help="Output movie name",
-                        required=False, default='output.mp4')
+                        required=False)
     parser.add_argument('--no-sort', action='store_true', default=False,
                         help='Do not sort by mjd')
     parser.add_argument('-f', '--fps', help='Frames per second',
                         required=False, default=15, type=int)
     parser.add_argument('--no-multiprocessing', help='Run serially',
-            action='store_true', default=False)
+                        action='store_true', default=False)
+    parser.add_argument('-d', '--images-dir', required=False,
+                        help='Custom directory to put the intermediate images')
+    parser.add_argument('--no-delete-tmpdir', action='store_true',
+                        default=False,
+                        help='Do not delete temporary directory of pngs')
     return parser.parse_args()
 
 
