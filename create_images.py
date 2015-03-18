@@ -112,9 +112,18 @@ def generate_movie(image_directory, output_filename, fps=15):
         sp.check_call(cmd)
 
 
+def ensure_dir(d):
+    try:
+        os.makedirs(d)
+    except OSError:
+        shutil.rmtree(d)
+        os.makedirs(d)
+
+
 @contextmanager
 def temporary_directory(images_dir=None, delete=True, *args, **kwargs):
     if images_dir is not None:
+        ensure_dir(images_dir)
         yield images_dir
     else:
         dirname = tempfile.mkdtemp(*args, **kwargs)
