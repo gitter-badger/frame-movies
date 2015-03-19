@@ -186,39 +186,84 @@ class TimeSeries(object):
         axis.axvline(self.x[index], color='k', ls='--')
 
 
-def main(args):
-    files = args.filename
+def create_images(files, output_movie=None, images_directory=None,
+        delete_tempdir=True, sort=True, multiprocess=True, fps=15,
+        verbose=False):
+    '''
+    Build a movie out of a series of fits files.
 
-    if args.verbose:
+    :param files:
+        Files to render
+
+    :param output_movie:
+        Resulting filename for the movie. If not given then do not render
+        a movie
+
+    :param images_directory:
+        Directory to put the png files. If not supplied use a random temporary
+        directory, and delete after use. Otherwise leave the specified
+        directory in place
+
+    :param delete_tempdir:
+        If using a temporary png directory, delete it after the movie is
+        finished
+
+    :param sort:
+        Sort by the fits header keyword ``mjd``
+
+    :param multiprocess:
+        Generate the png movies in parallel
+
+    :param fps:
+        Frames per second of the final movie
+
+    :param verbose:
+        Print more verbose logging information
+    '''
+
+    if verbose:
         logger.setLevel('DEBUG')
 
     logger.info('Building {} files'.format(len(files)))
-    if args.output is None:
+    if output_movie is None:
         logger.warning('Not creating movie')
 
-    delete = not args.no_delete_tmpdir
-    with temporary_directory(args.images_dir, delete=delete) as image_dir:
+    with temporary_directory(images_directory,
+                             delete=delete_tempdir) as image_dir:
+
         logger.info("Building into {}".format(image_dir))
 
-        if args.no_sort:
+        if sort:
+            sorted_files = sort_images(files)
+        else:
             logger.warning('Not sorting images')
             sorted_files = files
-        else:
-            sorted_files = sort_images(files)
 
         logger.info('Extracting time series from data')
         median_behaviour = TimeSeries.extract_from(sorted_files)
 
         logger.info('Building movie images')
-        pool = mp.Pool() if not args.no_multiprocessing else NullPool()
+        pool = mp.Pool() if multiprocess else NullPool()
         fn = partial(build_image, outdir=image_dir,
                      median_behaviour=median_behaviour,
                      nimages=len(sorted_files))
         pool.map(fn, enumerate(sorted_files))
 
-        if args.output is not None:
-            output_filename = os.path.realpath(args.output)
-            generate_movie(image_dir, output_filename, fps=args.fps)
+        if output_movie is not None:
+            output_filename = os.path.realpath(output_movie)
+            generate_movie(image_dir, output_filename, fps=fps)
+
+
+def main(args):
+    create_images(
+        files=args.filename,
+        output_movie=args.output,
+        images_directory=args.images_dir,
+        sort=not args.no_sort,
+        multiprocess=not args.no_multiprocessing,
+        delete_tempdir=not args.no_delete_tmpdir,
+        verbose=args.verbose,
+    )
 
 
 def parse_args():
