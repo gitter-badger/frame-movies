@@ -36,7 +36,7 @@ All code is written in Python. I recommend the [Anaconda python distribution](ht
 ### Python dependencies
 
 * matplotlib
-* fitsio
+* astropy
 * numpy
 * moviepy
 
