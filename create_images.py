@@ -188,6 +188,10 @@ class TimeSeries(object):
 
 def main(args):
     files = args.filename
+
+    if args.verbose:
+        logger.setLevel('DEBUG')
+
     logger.info('Building {} files'.format(len(files)))
     if args.output is None:
         logger.warning('Not creating movie')
@@ -233,6 +237,8 @@ def parse_args():
     parser.add_argument('--no-delete-tmpdir', action='store_true',
                         default=False,
                         help='Do not delete temporary directory of pngs')
+    parser.add_argument('--verbose', action='store_true', default=False,
+                        help='Verbose logging')
     return parser.parse_args()
 
 
