@@ -67,9 +67,9 @@ def build_image((i, input_fname), outdir, median_behaviour,
                                     i,
                                     os.path.basename(input_fname)))
     if nimages is None:
-        logger.info('Building image %s', i)
+        logger.info('Building image %s', i + 1)
     else:
-        logger.info('Building image %s/%s', i, nimages)
+        logger.info('Building image %s/%s', i + 1, nimages)
 
     logger.debug('%s => %s', input_fname, output_fname)
 
