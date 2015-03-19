@@ -56,7 +56,7 @@ del cams[899]
 for i in cams:
 	if len(cams[i]) > 0:
 		for j in cams[i]:
-			print "/ngts/%d/%s/*.fits" % (das[i],j)
+			print "/ngts/%s/%s/*.fits" % (das[i],j)
 			t=g.glob('/ngts/%s/%s/*.fits' % (das[i],j))
 			
 			
