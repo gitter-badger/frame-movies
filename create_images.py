@@ -12,8 +12,8 @@ import multiprocessing as mp
 import tempfile
 from contextlib import contextmanager
 from functools import partial
-import fitsio
 import subprocess as sp
+from astropy.io import fits
 import shutil
 import sys
 import numpy as np
@@ -46,9 +46,9 @@ def pack_images(dirname, output_name, kind='png'):
 
 
 def extract_image_data(input_fname):
-    with fitsio.FITS(input_fname) as infile:
-        image_data = infile[0].read()
-        header = infile[0].read_header()
+    with fits.open(input_fname) as infile:
+        image_data = infile[0].data
+        header = infile[0].header
 
     if image_data.shape == (2048, 2088):
         overscan = image_data[4:, -15:].mean()
@@ -93,7 +93,7 @@ def build_image((i, input_fname), outdir, median_behaviour,
 
 def sort_images(images):
     logger.info('Sorting images by mjd')
-    return sorted(images, key=lambda fname: fitsio.read_header(fname)['mjd'])
+    return sorted(images, key=lambda fname: fits.getheader(fname)['mjd'])
 
 
 def generate_movie(image_directory, output_filename, fps=15):
