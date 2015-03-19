@@ -158,9 +158,10 @@ def sort_images(images):
     return sorted(images, key=lambda fname: fits.getheader(fname)['mjd'])
 
 
-def generate_movie(image_directory, output_filename, fps=15):
+def generate_movie(image_directory, output_filename, fps=15,
+                   use_mencoder=False):
     '''
-    Render a mp4 movie from a directory of png files
+    Render a mp4 movie from a directory of png files. Use ffmpeg for this.
 
     :param image_directory:
         Directory of png files
@@ -170,19 +171,36 @@ def generate_movie(image_directory, output_filename, fps=15):
 
     :param fps:
         Frames per second of the final movie
+
+    :param use_mencoder:
+        Use mencoder instead of ffmpeg
     '''
     logger.info('Building movie file {}, fps {}'.format(
         output_filename, fps)
     )
     n_cpu = mp.cpu_count()
     with change_directory(image_directory):
-        cmd = ['mencoder', 'mf://*.png', '-mf',
-               'w=800:h=600:fps={}:type=png'.format(fps),
-               '-ovc', 'x264', '-x264encopts',
-               'crf=18:nofast_pskip:nodct_decimate:nocabac:global_header:threads={}'.format(
-                   n_cpu),
-               '-of', 'lavf', '-lavfopts', 'format=mp4',
-               '-o', output_filename]
+        if use_mencoder:
+            cmd = list(map([
+                'mencoder', 'mf://*.png', '-mf',
+                'w=800:h=600:fps={}:type=png'.format(fps),
+                '-ovc', 'x264', '-x264encopts',
+                'crf=18:nofast_pskip:nodct_decimate:nocabac:global_header:threads={}'.format(
+                    n_cpu),
+                '-of', 'lavf', '-lavfopts', 'format=mp4',
+                '-o', output_filename
+            ]))
+        else:
+            cmd = list(map(str, [
+                'ffmpeg', '-y',
+                '-framerate', fps,
+                '-pattern_type', 'glob', '-i', '*.png',
+                '-c:v', 'mpeg4',
+                '-b:v', '16M',
+                '-threads', n_cpu, output_filename
+            ]))
+
+        logger.debug('Running command %s', ' '.join(cmd))
         sp.check_call(cmd)
 
 
@@ -287,8 +305,8 @@ class TimeSeries(object):
 
 
 def create_movie(files, output_movie=None, images_directory=None,
-                  delete_tempdir=True, sort=True, multiprocess=True, fps=15,
-                  verbose=False):
+                 delete_tempdir=True, sort=True, multiprocess=True, fps=15,
+                 verbose=False):
     '''
     Build a movie out of a series of fits files.
 
