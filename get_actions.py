@@ -34,9 +34,9 @@ del cams[899]
 
 # set the key to the das machines for each camera
 das={801:None,
-	802:das06,
-	803:das09,
-	804:das04,
+	802:'das06',
+	803:'das09',
+	804:'das04',
 	805:None,
 	806:None,
 	807:None,
