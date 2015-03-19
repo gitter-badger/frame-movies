@@ -52,7 +52,7 @@ def extract_image_data(input_fname):
 
     if image_data.shape == (2048, 2088):
         overscan = image_data[4:, -15:].mean()
-        logger.warning('Image is raw, subtracting overscan {}'.format(
+        logger.debug('Image is raw, subtracting overscan {}'.format(
             overscan)
         )
         image_data = image_data[:, 20:-20] - overscan
