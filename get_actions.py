@@ -4,6 +4,7 @@
 
 import pymysql 
 import logging
+import glob as g
 # from create_images import create_images as cimgs
 
 # connect to database
