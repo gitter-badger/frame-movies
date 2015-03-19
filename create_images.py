@@ -61,13 +61,17 @@ def extract_image_data(input_fname):
 
 
 def build_image((i, input_fname), outdir, median_behaviour,
-                frame_min=0.8, frame_max=1.2):
+                frame_min=0.8, frame_max=1.2, nimages=None):
     output_fname = os.path.join(outdir,
                                 '{:05d}_{}.png'.format(
                                     i,
                                     os.path.basename(input_fname)))
-    logger.debug('Building image {} => {}'.format(input_fname,
-                                                  output_fname))
+    if nimages is None:
+        logger.info('Building image %s', i)
+    else:
+        logger.info('Building image %s/%s', i, nimages)
+
+    logger.debug('%s => %s', input_fname, output_fname)
 
     if os.path.isfile(output_fname):
         logger.debug("Image {} exists, skipping".format(output_fname))
@@ -184,6 +188,10 @@ class TimeSeries(object):
 
 def main(args):
     files = args.filename
+
+    if args.verbose:
+        logger.setLevel('DEBUG')
+
     logger.info('Building {} files'.format(len(files)))
     if args.output is None:
         logger.warning('Not creating movie')
@@ -204,7 +212,8 @@ def main(args):
         logger.info('Building movie images')
         pool = mp.Pool() if not args.no_multiprocessing else NullPool()
         fn = partial(build_image, outdir=image_dir,
-                     median_behaviour=median_behaviour)
+                     median_behaviour=median_behaviour,
+                     nimages=len(sorted_files))
         pool.map(fn, enumerate(sorted_files))
 
         if args.output is not None:
@@ -228,6 +237,8 @@ def parse_args():
     parser.add_argument('--no-delete-tmpdir', action='store_true',
                         default=False,
                         help='Do not delete temporary directory of pngs')
+    parser.add_argument('--verbose', action='store_true', default=False,
+                        help='Verbose logging')
     return parser.parse_args()
 
 
