@@ -29,9 +29,6 @@ cams={801:[],
 	812:[],
 	899:[]}
 
-# remove the roof entry, not needed
-del cams[899]
-
 # set the key to the das machines for each camera
 das={801:None,
 	802:'das06',
@@ -51,6 +48,9 @@ das={801:None,
 for row in cur:
 	cams[row[1]].append("action%s_%s" % (row[0],row[4]))
 
+
+# remove the roof entry, not needed
+del cams[899]
 
 # now we have the action ids go through and create the images for each 
 for i in cams:
