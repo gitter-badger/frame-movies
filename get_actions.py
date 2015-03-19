@@ -2,10 +2,11 @@
 # movies and pngs should go in /ngts/staging/movies/
 # ./create_images.py -d /path/to/png_directory `ls /ngts/dasXX/actionYYYY_ZZZZZ/*IMAGE*.fits` 
 
+import os, os.path
 import pymysql 
 import logging
 import glob as g
-# from create_images import create_images as cimgs
+from create_images import create_movie as cimgs
 
 # connect to database
 conn=pymysql.connect(host='ds',db='ngts_ops')
@@ -56,6 +57,10 @@ del cams[899]
 # now we have the action ids go through and create the images for each 
 for i in cams:
 	if len(cams[i]) > 0:
+		movie_dir="/ngts/%s/movie" % (das[i])
+		if os.path.exists(movie_dir) == False:
+			os.mkdir(movie_dir)	
+		print movie_dir
 		for j in cams[i]:
 			print "/ngts/%s/%s/*.fits" % (das[i],j)
 			t=g.glob('/ngts/%s/%s/*.fits' % (das[i],j))
