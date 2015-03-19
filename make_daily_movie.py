@@ -8,7 +8,7 @@ import os, os.path
 import pymysql 
 import logging
 import glob as g
-from create_images import create_movie as cmovie
+from create_movie import create_movie as cmovie
 
 def make_pngs():
 	'''
