@@ -306,7 +306,7 @@ class TimeSeries(object):
 
 def create_movie(files, output_movie=None, images_directory=None,
                  delete_tempdir=True, sort=True, multiprocess=True, fps=15,
-                 verbose=False):
+                 use_mencoder=False, verbose=False):
     '''
     Build a movie out of a series of fits files.
 
@@ -369,7 +369,8 @@ def create_movie(files, output_movie=None, images_directory=None,
 
         if output_movie is not None:
             output_filename = os.path.realpath(output_movie)
-            generate_movie(image_dir, output_filename, fps=fps)
+            generate_movie(image_dir, output_filename, fps=fps,
+                           use_mencoder=use_mencoder)
 
 
 def main(args):
@@ -384,6 +385,7 @@ def main(args):
         sort=not args.no_sort,
         multiprocess=not args.no_multiprocessing,
         delete_tempdir=not args.no_delete_tmpdir,
+        use_mencoder=args.use_mencoder,
         verbose=args.verbose,
     )
 
@@ -408,6 +410,8 @@ def parse_args():
     parser.add_argument('--no-delete-tmpdir', action='store_true',
                         default=False,
                         help='Do not delete temporary directory of pngs')
+    parser.add_argument('--use-mencoder', action='store_true',
+                        default=False, help='Use mencoder instead of ffmpeg')
     parser.add_argument('--verbose', action='store_true', default=False,
                         help='Verbose logging')
     return parser.parse_args()
