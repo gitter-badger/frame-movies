@@ -286,7 +286,7 @@ class TimeSeries(object):
         axis.axvline(self.x[index], color='k', ls='--')
 
 
-def create_images(files, output_movie=None, images_directory=None,
+def create_movie(files, output_movie=None, images_directory=None,
                   delete_tempdir=True, sort=True, multiprocess=True, fps=15,
                   verbose=False):
     '''
@@ -359,7 +359,7 @@ def main(args):
     Main script access when calling from the command line. Just take 
     the arguments object from argparse and convert to function arguments
     '''
-    create_images(
+    create_movie(
         files=args.filename,
         output_movie=args.output,
         images_directory=args.images_dir,
