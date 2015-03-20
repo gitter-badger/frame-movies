@@ -26,9 +26,7 @@ import os, os.path, datetime
 import pymysql 
 import logging
 import glob as g
-from create_movie import create_movie as cmovie
-from create_movie import generate_movie as gmovie 
-from create_movie import logger
+from create_movie import create_movie, generate_movie, logger
 import numpy as np
 import getpass
 me=getpass.getuser()
@@ -132,7 +130,7 @@ def make_pngs():
 				t=sorted(g.glob('%s%s/%s/*.fits' % (top_dir,das[i],j)))
 				
 				camera_movie_dir=movie_dir+das[i]
-				cmovie(t,images_directory=camera_movie_dir)
+				create_movie(t,images_directory=camera_movie_dir)
 
 
 def getDatetime(t):
@@ -314,7 +312,7 @@ def make_montage(movie_dir,das):
 
 
 def make_movie(movie_dir,movie):
-	gmovie(movie_dir,movie)
+	generate_movie(movie_dir,movie)
 	
 
 def main():
