@@ -175,6 +175,8 @@ def generate_movie(image_directory, output_filename, fps=15,
     :param use_mencoder:
         Use mencoder instead of ffmpeg
     '''
+    output_filename = os.path.realpath(output_filename)
+
     logger.info('Building movie file {}, fps {}'.format(
         output_filename, fps)
     )
