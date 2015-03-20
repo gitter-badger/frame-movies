@@ -7,7 +7,7 @@
 #                                                                             #
 # Version History:                                                            #
 #	20150319	v1.0	Code written                                          #
-#   20150321	v1.1	Added montaging                                       #
+#   20150321	v1.1	Added montaging + logger                              #
 #                                                                             #
 ###############################################################################
 #
@@ -18,9 +18,7 @@
 #	use ffmpeg to make the movie of the montaged pngs
 #
 # to do: 
-#	add montaging 
-#	change montaging to look at start time not longest run
-#	add movie making with ffmpeg
+#	add movie making with ffmpeg (generate_movie)
 #
 #
 
@@ -30,6 +28,7 @@ import logging
 import glob as g
 from create_movie import create_movie as cmovie
 from create_movie import generate_movie as gmovie 
+from create_movie import logger
 import numpy as np
 import getpass
 me=getpass.getuser()
@@ -127,9 +126,9 @@ def make_pngs():
 		if len(cams[i]) > 0 and das[i] != None:
 			if os.path.exists(movie_dir) == False:
 				os.mkdir(movie_dir)	
-			print movie_dir
+			logger.info(movie_dir)
 			for j in cams[i]:
-				print "%s%s/%s/*.fits" % (top_dir,das[i],j)
+				logger.info("%s%s/%s/*.fits" % (top_dir,das[i],j))
 				t=sorted(g.glob('%s%s/%s/*.fits' % (top_dir,das[i],j)))
 				
 				camera_movie_dir=movie_dir+das[i]
@@ -164,7 +163,7 @@ def make_montage(movie_dir,das):
 		os.mkdir(movie_dir)
 	
 	os.chdir(movie_dir)		
-	print "Moving to: " + os.getcwd()
+	logger.info("Moving to: " + os.getcwd())
 	
 	# empty lists for various things	
 	t_refs=[]
@@ -179,12 +178,12 @@ def make_montage(movie_dir,das):
 	for i in das:
 		if das[i] != None:
 			os.chdir(das[i])
-			print "Moving to: " + os.getcwd()
+			logger.info("Moving to: " + os.getcwd())
 			
 			t=sorted(g.glob('*.png'))
 			if len(t) == 0:
 				os.chdir('../')
-				print "Moving to: " + os.getcwd()
+				logger.info("Moving to: " + os.getcwd())
 				continue
 			
 			x=getDatetime(t[0])				
@@ -193,7 +192,7 @@ def make_montage(movie_dir,das):
 			das_tracker.append(das[i])
 			
 			os.chdir('../')
-			print "Moving to: " + os.getcwd()
+			logger.info("Moving to: " + os.getcwd())
 	
 	# list of earliest times per camera
 	# and length of imaging run		
@@ -204,7 +203,7 @@ def make_montage(movie_dir,das):
 	n=np.where(t_refs==min(t_refs))[0]
 	if len(n) > 1:
 		n=n[0]
-	print "Reference DAS machine: " + das_tracker[n]
+	logger.info("Reference DAS machine: " + das_tracker[n])
 
 	##############################
 	# start in earliest folder and
@@ -212,7 +211,7 @@ def make_montage(movie_dir,das):
 	##############################	
 	
 	os.chdir(das_tracker[n])
-	print "Moving to: " + os.getcwd()
+	logger.info("Moving to: " + os.getcwd())
 
 	# these are the time slots, match the other images to start with a certain slot
 	slots=np.arange(0,imlens[n],1)
@@ -225,7 +224,7 @@ def make_montage(movie_dir,das):
 		t_refs.append(x)
 	
 	os.chdir('../')
-	print "Moving to: " + os.getcwd()
+	logger.info("Moving to: " + os.getcwd())
 	
 	
 	##############################
@@ -236,29 +235,27 @@ def make_montage(movie_dir,das):
 	for i in das:
 		if das[i] != None:
 			os.chdir(das[i])
-			print "Moving to: " + os.getcwd()
+			logger.info("Moving to: " + os.getcwd())
 			
 			t=sorted(g.glob('*.png'))
 			if len(t) == 0:
 				os.chdir('../')
-				print "Moving to: " + os.getcwd()
+				logger.info("Moving to: " + os.getcwd())
 				continue
 				
 			x=getDatetime(t[0])	
 			diff=[]
 			for j in range(0,len(t_refs)):
 				diff.append(abs((t_refs[j]-x).total_seconds()))
-			print diff
 			
 			z=diff.index(min(diff))
-			print z
 			start_id[i]=z
 			
 			os.chdir('../')
-			print "Moving to: " + os.getcwd()
+			logger.info("Moving to: " + os.getcwd())
 	
-	print "Dictionary of start_ids:"
-	print start_id
+	logger.info("Dictionary of start_ids:")
+	logger.info(start_id)
 	
 	##############################
 	# work out the new video size for
@@ -310,8 +307,8 @@ def make_montage(movie_dir,das):
 				except IndexError:
 					files=files+"empty/empty.png "
 					
-		print "[%d/%d]" % (i+1,run_len)
-		print files
+		logger.debug("[%d/%d]" % (i+1,run_len))
+		logger.debug(files)
 		
 		# now montage them together
 		os.system("montage %s -tile 6x2 -geometry 400x300-50+3 tiled_%05d.png" % (files,i))
