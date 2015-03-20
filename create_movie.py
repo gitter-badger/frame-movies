@@ -203,7 +203,7 @@ def generate_movie(image_directory, output_filename, fps=15,
             ]))
 
         logger.debug('Running command %s', ' '.join(cmd))
-        sp.check_call(cmd, stderr=sp.PIPE)
+        sp.check_call(cmd)
 
 
 def ensure_dir(d):
