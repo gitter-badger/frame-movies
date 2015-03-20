@@ -34,7 +34,7 @@ import glob as g
 import os, datetime
 
 #topdir="/Volumes/DATA/ngts/paranal/saturation_check/23-wasp18b/test_pngs"
-topdir="."
+topdir="test_pngs"
 
 os.chdir(topdir)
 
