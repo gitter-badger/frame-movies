@@ -7,7 +7,10 @@ from create_movie import generate_movie
 
 
 def test_generate_movie(tmpdir):
-    images_dir = 'images'
+    images_dir = os.path.realpath(
+            os.path.join(
+                os.path.dirname(__file__),
+                'fixtures'))
     output_filename = tmpdir.join('out.mp4')
     generate_movie(images_dir, str(output_filename))
     assert (os.path.isfile(str(output_filename)) and
