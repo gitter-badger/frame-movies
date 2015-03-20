@@ -29,6 +29,7 @@ import pymysql
 import logging
 import glob as g
 from create_movie import create_movie as cmovie
+from create_movie import generate_movie as gmovie 
 import numpy as np
 import getpass
 me=getpass.getuser()
@@ -129,7 +130,7 @@ def make_pngs():
 			print movie_dir
 			for j in cams[i]:
 				print "%s%s/%s/*.fits" % (top_dir,das[i],j)
-				t=g.glob('%s%s/%s/*.fits' % (top_dir,das[i],j))
+				t=sorted(g.glob('%s%s/%s/*.fits' % (top_dir,das[i],j)))
 				
 				camera_movie_dir=movie_dir+das[i]
 				cmovie(t,images_directory=camera_movie_dir)
@@ -167,7 +168,7 @@ def make_montage(movie_dir,das):
 	
 	# empty lists for various things	
 	t_refs=[]
-	das_tracker,camera_tracker=[],[]
+	das_tracker=[]
 	imlens=[]
 	
 	##############################
@@ -180,7 +181,7 @@ def make_montage(movie_dir,das):
 			os.chdir(das[i])
 			print "Moving to: " + os.getcwd()
 			
-			t=g.glob('*.png')
+			t=sorted(g.glob('*.png'))
 			if len(t) == 0:
 				os.chdir('../')
 				print "Moving to: " + os.getcwd()
@@ -190,7 +191,6 @@ def make_montage(movie_dir,das):
 			t_refs.append(x)
 			imlens.append(len(t))
 			das_tracker.append(das[i])
-			camera_tracker.append(i)
 			
 			os.chdir('../')
 			print "Moving to: " + os.getcwd()
@@ -202,6 +202,8 @@ def make_montage(movie_dir,das):
 	
 	# now work out which was the earliest and go there to start the time series
 	n=np.where(t_refs==min(t_refs))[0]
+	if len(n) > 1:
+		n=n[0]
 	print "Reference DAS machine: " + das_tracker[n]
 
 	##############################
@@ -216,7 +218,7 @@ def make_montage(movie_dir,das):
 	slots=np.arange(0,imlens[n],1)
 	
 	# reset t_refs for start_id calculations
-	t=g.glob('*.png')
+	t=sorted(g.glob('*.png'))
 	t_refs=[]
 	
 	for i in range(0,len(t)):		
@@ -232,30 +234,31 @@ def make_montage(movie_dir,das):
 	# generate their starting points
 	##############################
 	
-	for i in range(0,len(das_tracker)):
-		os.chdir(das_tracker[i])
-		print "Moving to: " + os.getcwd()
-		
-		t=g.glob('*.png')
-		if len(t) == 0:
+	for i in das:
+		if das[i] != None:
+			os.chdir(das[i])
+			print "Moving to: " + os.getcwd()
+			
+			t=sorted(g.glob('*.png'))
+			if len(t) == 0:
+				os.chdir('../')
+				print "Moving to: " + os.getcwd()
+				continue
+				
+			x=getDatetime(t[0])
+				
+			diff=[]
+			for j in range(0,len(t_refs)):
+				diff.append(abs((t_refs[j]-x).total_seconds()))
+			
+			print diff
+			
+			z=diff.index(min(diff))
+			print z
+			start_id[i]=z
+			
 			os.chdir('../')
 			print "Moving to: " + os.getcwd()
-			continue
-			
-		x=getDatetime(t[0])
-			
-		diff=[]
-		for j in range(0,len(t_refs)):
-			diff.append(abs((t_refs[j]-x).total_seconds()))
-		
-		print diff
-		
-		z=diff.index(min(diff))
-		print z
-		start_id[camera_tracker[i]]=z
-		
-		os.chdir('../')
-		print "Moving to: " + os.getcwd()
 	
 	print "Dictionary of start_ids:"
 	print start_id
@@ -301,11 +304,15 @@ def make_montage(movie_dir,das):
 		os.system("montage %s -tile 6x2 -geometry 400x300-50+3 tiled_%05d.png" % (files,i))
 
 
+def make_movie(movie_dir,movie):
+	gmovie(movie_dir,movie)
+	
+
 def main():
 	
-	make_pngs()
-	make_montage(movie_dir,das)
-
+	#make_pngs()
+	#make_montage(movie_dir,das)
+	make_movie(movie_dir,"movie")
 
 if __name__=='__main__':
 	main()			
