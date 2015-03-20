@@ -220,7 +220,6 @@ def make_montage(movie_dir,das):
 	# reset t_refs for start_id calculations
 	t=sorted(g.glob('*.png'))
 	t_refs=[]
-	
 	for i in range(0,len(t)):		
 		x=getDatetime(t[i])
 		t_refs.append(x)
@@ -245,12 +244,10 @@ def make_montage(movie_dir,das):
 				print "Moving to: " + os.getcwd()
 				continue
 				
-			x=getDatetime(t[0])
-				
+			x=getDatetime(t[0])	
 			diff=[]
 			for j in range(0,len(t_refs)):
 				diff.append(abs((t_refs[j]-x).total_seconds()))
-			
 			print diff
 			
 			z=diff.index(min(diff))
@@ -277,15 +274,31 @@ def make_montage(movie_dir,das):
 	##############################
 	# montage based on start_ids
 	##############################
-
+	
+	# keep a dictionary of the directory contents from 
+	# first glob as to not check each time we loop around...
+	t={801:[],
+		802:[],
+		803:[],
+		804:[],
+		805:[],
+		806:[],
+		807:[],
+		808:[],
+		809:[],
+		810:[],
+		811:[],
+		812:[]}
+	
 	for i in range(0,run_len):
 		files=""
 		
 		for j in das:
-			if das[j] != None:
-				t=sorted(g.glob('%s/*.png' % (das[j])))
-			else:
-				t=[]
+			if i==0:
+				if das[j] != None:
+					t[j].append(sorted(g.glob('%s/*.png' % (das[j]))))
+				else:
+					t[j].append([])
 			
 			if start_id[j] == -1:
 				files=files+"empty/empty.png "
@@ -293,13 +306,13 @@ def make_montage(movie_dir,das):
 				files=files+"empty/empty.png "
 			else:
 				try:
-					files=files+t[i-start_id[j]]+" " 
+					files=files+t[j][0][i-start_id[j]]+" " 
 				except IndexError:
 					files=files+"empty/empty.png "
 					
 		print "[%d/%d]" % (i+1,run_len)
 		print files
-	
+		
 		# now montage them together
 		os.system("montage %s -tile 6x2 -geometry 400x300-50+3 tiled_%05d.png" % (files,i))
 
@@ -310,8 +323,8 @@ def make_movie(movie_dir,movie):
 
 def main():
 	
-	#make_pngs()
-	#make_montage(movie_dir,das)
+	make_pngs()
+	make_montage(movie_dir,das)
 	make_movie(movie_dir,"movie")
 
 if __name__=='__main__':
