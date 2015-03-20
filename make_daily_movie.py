@@ -303,9 +303,7 @@ def make_montage(movie_dir,das):
 
 def main():
 	
-	pngs = 0
-	if pngs > 0:
-		make_pngs()
+	make_pngs()
 	make_montage(movie_dir,das)
 
 
