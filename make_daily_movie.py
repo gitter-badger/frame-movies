@@ -297,9 +297,7 @@ def make_montage(movie_dir,das):
 				else:
 					t[j].append([])
 			
-			if start_id[j] == -1:
-				files=files+"empty/empty.png "
-			elif i < start_id[j]: 	
+			if start_id[j] == -1 or i < start_id[j]:
 				files=files+"empty/empty.png "
 			else:
 				try:
@@ -307,11 +305,12 @@ def make_montage(movie_dir,das):
 				except IndexError:
 					files=files+"empty/empty.png "
 					
-		logger.debug("[%d/%d]" % (i+1,run_len))
-		logger.debug(files)
+		logger.debug("[%d/%d] %s" % (i+1,run_len,files))
 		
 		# now montage them together
-		os.system("montage %s -tile 6x2 -geometry 400x300-50+3 tiled_%05d.png" % (files,i))
+		comm="montage %s -tile 6x2 -geometry 400x300-50+3 tiled_%05d.png" % (files,i)
+		logger.debug(comm)
+		os.system(comm)
 
 
 def make_movie(movie_dir,movie):
