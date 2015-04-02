@@ -129,8 +129,13 @@ def build_image((i, input_fname), outdir, median_behaviour,
         logger.debug("Image {} exists, skipping".format(output_fname))
         return
 
-    fig, axes = plt.subplots(2, 1, figsize=(8, 8),
-                             gridspec_kw={'height_ratios': [0.8, 0.2]})
+    fig = plt.figure(figsize=(8, 8))
+    # Get around not having plt.subplots in matplotlib versions < 1.4
+    axes = [
+            plt.subplot2grid((4, 4), (0, 0), colspan=3, rowspan=3),
+            plt.subplot2grid((4, 4), (3, 0), colspan=3),
+            ]
+
     header, image_data = extract_image_data(input_fname)
     med_image = np.median(image_data)
     z1, z2 = (med_image * frame_min, med_image * frame_max)
