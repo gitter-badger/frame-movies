@@ -345,6 +345,11 @@ def create_movie(files, output_movie=None, images_directory=None,
         logger.setLevel('DEBUG')
 
     logger.info('Building {} files'.format(len(files)))
+    
+    if len(files) == 0:
+    	logger.warning('No files to build')
+    	return
+    
     if output_movie is None:
         logger.warning('Not creating movie')
 
