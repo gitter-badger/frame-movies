@@ -29,6 +29,8 @@ import glob as g
 from create_movie import create_movie, generate_movie, logger
 import numpy as np
 import getpass
+import argparse as ap
+
 me=getpass.getuser()
 
 ######################################################
@@ -89,6 +91,15 @@ start_id={801:-1,
 ######################################################
 ##################### Functions ######################
 ######################################################
+
+def ArgParse():
+	parser=ap.ArgumentParser()
+	parser.add_argument("--pngs",help="make the PNG files",action="store_true")
+	parser.add_argument("--montage",help="montage all PNG files",action="store_true")
+	parser.add_argument("--movie",help="make movie from montaged PNG files",action="store_true")
+	args=parser.parse_args()
+	return args
+
 
 def make_pngs():
 	'''
@@ -315,11 +326,14 @@ def make_movie(movie_dir,movie):
 	generate_movie(movie_dir,movie)
 	
 
-def main():
-	
-	make_pngs()
-	make_montage(movie_dir,das)
-	make_movie(movie_dir,"movie")
+def main():	
+	args=ArgParse()
+	if args.pngs:
+		make_pngs()
+	if args.montage:
+		make_montage(movie_dir,das)
+	if args.movie:
+		make_movie(movie_dir,"movie")
 
 if __name__=='__main__':
 	main()			
