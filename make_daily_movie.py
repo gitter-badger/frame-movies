@@ -116,12 +116,12 @@ def make_pngs():
 		cur=conn.cursor()
 		
 		# get the actions from yesterday
-		qry="SELECT * FROM action_list WHERE schedule_start_utc BETWEEN date_sub(now(), INTERVAL 1 DAY) AND now()"
+		qry="SELECT action_id,action FROM action_list WHERE schedule_start_utc BETWEEN date_sub(now(), INTERVAL 1 DAY) AND now()"
 		cur.execute(qry)
 			
 		# get the action ids for each camera (and dome 899)
 		for row in cur:
-			cams[row[1]].append("action%s_%s" % (row[0],row[4]))
+			cams[row[1]].append("action%s_%s" % (row[0],row[1]))
 		
 	if me=='James':
 		for i in cams:
