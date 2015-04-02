@@ -2,7 +2,7 @@
 ###############################################################################
 #                                                                             #
 #            Script to make a movie from the previous night's images          #
-#                                    v1.0                                     #
+#                                    v1.1                                     #
 #                               James McCormac                                #
 #                                                                             #
 # Version History:                                                            #
