@@ -121,7 +121,8 @@ def make_pngs():
 			
 		# get the action ids for each camera (and dome 899)
 		for row in cur:
-			cams[row[1]].append("action%s_%s" % (row[0],row[2]))
+			if row[2] != 'stow':
+				cams[row[1]].append("action%s_%s" % (row[0],row[2]))
 		
 	if me=='James':
 		for i in cams:
