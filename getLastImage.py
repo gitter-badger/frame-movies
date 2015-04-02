@@ -62,21 +62,23 @@ os.chdir(topdir)
 for cam in cams:
 	if len(cams[cam]) > 0 and cam != 899:
 		# go into the last action directory
-		os.chdir("%s/%s" % (das[cam],cams[cam][-1]))
 		
-		# get the last image
-		t=sorted(g.glob('*.fits'))
+		if das[cam] != None:
+			os.chdir("%s/%s" % (das[cam],cams[cam][-1]))
 		
-		if len(t)>0:
-		
-			create_movie(list(t[-1]),images_directory='/local/last_imgs/')
+			# get the last image
+			t=sorted(g.glob('*.fits'))
 			
-			#comm="%s/convert -size 300x300 -quality 0.5 %s %s/%s_last_img.png" % (convert_loc,t[-1],cron_dir,cam)
-			#os.system(comm)
-			print comm
-		else:
-			print "No fits images to convert, skipping %s..." % (das[cam])
-		
-		os.chdir('../../')
+			if len(t)>0:
+			
+				create_movie(list(t[-1]),images_directory='/local/last_imgs/c')
+				
+				#comm="%s/convert -size 300x300 -quality 0.5 %s %s/%s_last_img.png" % (convert_loc,t[-1],cron_dir,cam)
+				#os.system(comm)
+				print comm
+			else:
+				print "No fits images to convert, skipping %s..." % (das[cam])
+			
+			os.chdir('../../')
 		
 		
