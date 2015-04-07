@@ -226,8 +226,11 @@ def ensure_dir(d):
     try:
         os.makedirs(d)
     except OSError:
+        logger.debug('Cannot create directory %s, it already exists', d)
         shutil.rmtree(d)
         os.makedirs(d)
+    else:
+        logger.debug('Temporary directory %s created', d)
 
 
 @contextmanager
