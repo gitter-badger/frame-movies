@@ -64,25 +64,37 @@ os.chdir(topdir)
 for cam in cams:
 	if len(cams[cam]) > 0 and cam != 899:
 		# go into the last action directory
-		
 		if das[cam] != None:
 			os.chdir("%s/%s" % (das[cam],cams[cam][-1]))
 		
 			# get the last image
 			t=sorted(g.glob('*.fits'))
+			pngfile="%s.png" % (t[-1].split(".")[0])
 			
-			if len(t)>0:
-				create_movie([t[-1]],images_directory='/usr/local/cron/last_imgs/%s' % (cam),no_time_series=True)
+			if len(t)>0 and pngfile not in os.listdir('%s/last_imgs/%s/' % (cron_dir,cam)):
+				create_movie([t[-1]],images_directory='%s/last_imgs/%s' % (cron_dir,cam),no_time_series=True)
+			
+				here=os.getcwd()
+				os.chdir("/usr/local/cron/last_imgs/%s" % (cam))
+				t2=sorted(g.glob('*.png'))
+				
+				try:
+					f=open('last_img.log').readline()
+				except IOError:
+					f="XXX"
+				
+				if f not in t2:
+					os.system('cp %s %s/cam_%s.png' % (t2[-1],web_dir,t[i]))
+					f3=open('last_img.log','w')
+					f3.write(t2[-1])
+					f3.close()
+				else:
+					print "Last image already up to date, skipping..."
+				
+				os.chdir(here)
+			
 			else:
-				print "No fits images to convert, skipping %s..." % (das[cam])
+				print "No new fits images to convert, skipping %s..." % (das[cam])
 			
 			os.chdir('../../')
-
-# at the end rename all the images to default
-os.chdir("/usr/local/cron/last_imgs/")
-t=sorted(g.glob("8*"))
-for i in range(0,len(t)):
-	os.chdir(t[i])
-	os.system('cp *IMAGE*.png %s/cam_%s.png' % (web_dir,t[i]))
-	os.chdir('../')
 
