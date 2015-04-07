@@ -71,12 +71,7 @@ for cam in cams:
 			t=sorted(g.glob('*.fits'))
 			
 			if len(t)>0:
-			
-				create_movie([t[-1]],images_directory='/usr/local/cron/last_imgs/')
-				
-				#comm="%s/convert -size 300x300 -quality 0.5 %s %s/%s_last_img.png" % (convert_loc,t[-1],cron_dir,cam)
-				#os.system(comm)
-				#print comm
+				create_movie([t[-1]],images_directory='/usr/local/cron/last_imgs/%s' % (das[cam]))
 			else:
 				print "No fits images to convert, skipping %s..." % (das[cam])
 			
