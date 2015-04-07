@@ -1,3 +1,10 @@
+# to do:
+#  add top of file
+#  test in morning
+#  add token to ignore the image_id sequence in create_movie
+#  add logging
+#
+
 import pymysql 
 import os, sys
 import glob as g
@@ -52,7 +59,7 @@ conn=pymysql.connect(host='ds',db='ngts_ops')
 cur=conn.cursor()
 		
 # get the actions from yesterday
-qry="SELECT action_id,camera_id,action FROM action_list WHERE schedule_start_utc BETWEEN date_sub(now(), INTERVAL 7 DAY) AND now()"
+qry="SELECT action_id,camera_id,action FROM action_list WHERE schedule_start_utc BETWEEN date_sub(now(), INTERVAL 1 DAY) AND now()"
 cur.execute(qry)
 			
 # get the action ids for each camera (and dome 899)
@@ -83,8 +90,8 @@ for cam in cams:
 				except IOError:
 					f="XXX"
 				
-				if f not in t2:
-					os.system('cp %s %s/cam_%s.png' % (t2[-1],web_dir,t[i]))
+				if f != t2[-1]:
+					os.system('cp %s %s/cam_%s.png' % (t2[-1],web_dir,cam))
 					f3=open('last_img.log','w')
 					f3.write(t2[-1])
 					f3.close()
