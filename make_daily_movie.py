@@ -19,7 +19,7 @@
 #
 # to do: 
 #	add movie making with ffmpeg (generate_movie)
-#
+#	add a timer for the whole process
 #
 
 import os, os.path, datetime
