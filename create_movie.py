@@ -129,12 +129,17 @@ def build_image((i, input_fname), outdir, median_behaviour,
         logger.debug("Image {} exists, skipping".format(output_fname))
         return
 
+    no_time_series = median_behaviour is None
     fig = plt.figure(figsize=(8, 8))
-    # Get around not having plt.subplots in matplotlib versions < 1.4
-    axes = [
+
+    if no_time_series:
+        axes = [fig.add_subplot(111), ]
+    else:
+        # Get around not having plt.subplots in matplotlib versions < 1.4
+        axes = [
             plt.subplot2grid((4, 4), (0, 0), colspan=3, rowspan=3),
             plt.subplot2grid((4, 4), (3, 0), colspan=3),
-            ]
+        ]
 
     header, image_data = extract_image_data(input_fname)
     med_image = np.median(image_data)
@@ -144,8 +149,10 @@ def build_image((i, input_fname), outdir, median_behaviour,
     for dimension in ['xaxis', 'yaxis']:
         getattr(axes[0], dimension).set_visible(False)
     axes[0].set_title(header.get('image_id', None))
-    median_behaviour.plot(axes[1])
-    median_behaviour.add_vline(axes[1], i)
+
+    if not no_time_series:
+        median_behaviour.plot(axes[1])
+        median_behaviour.add_vline(axes[1], i)
 
     fig.tight_layout()
     fig.savefig(output_fname, bbox_inches='tight')
@@ -313,7 +320,7 @@ class TimeSeries(object):
 
 def create_movie(files, output_movie=None, images_directory=None,
                  delete_tempdir=True, sort=True, multiprocess=True, fps=15,
-                 use_mencoder=False, verbose=False):
+                 use_mencoder=False, no_time_series=False, verbose=False):
     '''
     Build a movie out of a series of fits files.
 
@@ -350,11 +357,11 @@ def create_movie(files, output_movie=None, images_directory=None,
         logger.setLevel('DEBUG')
 
     logger.info('Building {} files'.format(len(files)))
-    
+
     if len(files) == 0:
-    	logger.warning('No files to build')
-    	return
-    
+        logger.warning('No files to build')
+        return
+
     if output_movie is None:
         logger.warning('Not creating movie')
 
@@ -370,7 +377,10 @@ def create_movie(files, output_movie=None, images_directory=None,
             sorted_files = files
 
         logger.info('Extracting time series from data')
-        median_behaviour = TimeSeries.extract_from(sorted_files)
+        if not no_time_series:
+            median_behaviour = TimeSeries.extract_from(sorted_files)
+        else:
+            median_behaviour = None
 
         logger.info('Building movie images')
         pool = mp.Pool() if multiprocess else NullPool()
@@ -398,6 +408,7 @@ def main(args):
         multiprocess=not args.no_multiprocessing,
         delete_tempdir=not args.no_delete_tmpdir,
         use_mencoder=args.use_mencoder,
+        no_time_series=args.no_time_series,
         verbose=args.verbose,
     )
 
@@ -426,6 +437,8 @@ def parse_args():
                         default=False, help='Use mencoder instead of ffmpeg')
     parser.add_argument('--verbose', action='store_true', default=False,
                         help='Verbose logging')
+    parser.add_argument('-T', '--no-time-series', action='store_true',
+                        default=False, help='Disable time series plot')
     return parser.parse_args()
 
 
