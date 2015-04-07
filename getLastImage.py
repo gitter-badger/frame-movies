@@ -8,7 +8,7 @@ me=getpass.getuser()
 
 if me == "ops":
 	topdir="/ngts"
-	convert_loc="/usr/loca/bin"
+	convert_loc="/usr/local/bin"
 	cron_dir="/usr/local/cron"
 else:
 	print "Whoami!?"
@@ -81,5 +81,3 @@ for cam in cams:
 				print "No fits images to convert, skipping %s..." % (das[cam])
 			
 			os.chdir('../../')
-		
-		
