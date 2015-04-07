@@ -71,8 +71,17 @@ for cam in cams:
 			t=sorted(g.glob('*.fits'))
 			
 			if len(t)>0:
-				create_movie([t[-1]],images_directory='/usr/local/cron/last_imgs/%s' % (das[cam]))
+				create_movie([t[-1]],images_directory='/usr/local/cron/last_imgs/%s' % (cam))
 			else:
 				print "No fits images to convert, skipping %s..." % (das[cam])
 			
 			os.chdir('../../')
+
+# at the end rename all the images to default
+os.chdir("/usr/local/cron/last_imgs/")
+t=sorted(g.glob("8*"))
+for i in range(0,len(t)):
+	os.chdir(t[i])
+	os.system('mv *IMAGE*.png cam_%s.png' % (t[i]))
+	os.chdir('../')
+
