@@ -142,7 +142,7 @@ def make_pngs():
 				t=sorted(g.glob('%s%s/%s/*.fits' % (top_dir,das[i],j)))
 				
 				camera_movie_dir=movie_dir+das[i]
-				create_movie(t,images_directory=camera_movie_dir)
+				create_movie(t,images_directory=camera_movie_dir,include_increment=False)
 
 
 def getDatetime(t):
