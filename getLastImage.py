@@ -76,7 +76,7 @@ for cam in cams:
 				
 				#comm="%s/convert -size 300x300 -quality 0.5 %s %s/%s_last_img.png" % (convert_loc,t[-1],cron_dir,cam)
 				#os.system(comm)
-				print comm
+				#print comm
 			else:
 				print "No fits images to convert, skipping %s..." % (das[cam])
 			
