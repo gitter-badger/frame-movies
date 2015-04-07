@@ -64,6 +64,16 @@ def pack_images(dirname, output_name, kind='png'):
         sp.check_call(str_cmd)
 
 
+def construct_output_filename(outdir, input_fname, i, include_increment=True):
+    basename = os.path.basename(input_fname)
+    if include_increment:
+        stub = '{:05d}_{}.png'.format(i, basename)
+    else:
+        stub = '{}.png'.format(basename)
+
+    return os.path.join(outdir, stub)
+
+
 def extract_image_data(input_fname):
     '''
     Given a fits image, extract the image data and header.
@@ -89,7 +99,8 @@ def extract_image_data(input_fname):
 
 
 def build_image((i, input_fname), outdir, median_behaviour,
-                frame_min=0.8, frame_max=1.2, nimages=None):
+                frame_min=0.8, frame_max=1.2, nimages=None,
+                include_increment=True):
     '''
     Given a file, render a png of the output to the ``outdir`` directory.
 
@@ -114,10 +125,8 @@ def build_image((i, input_fname), outdir, median_behaviour,
     :param nimages:
         Number of images in the complete set
     '''
-    output_fname = os.path.join(outdir,
-                                '{:05d}_{}.png'.format(
-                                    i,
-                                    os.path.basename(input_fname)))
+    output_fname = construct_output_filename(outdir, input_fname, i,
+            include_increment=include_increment)
     if nimages is None:
         logger.info('Building image %s', i + 1)
     else:
@@ -323,7 +332,8 @@ class TimeSeries(object):
 
 def create_movie(files, output_movie=None, images_directory=None,
                  delete_tempdir=True, sort=True, multiprocess=True, fps=15,
-                 use_mencoder=False, no_time_series=False, verbose=False):
+                 use_mencoder=False, no_time_series=False,
+                 include_increment=True, verbose=False):
     '''
     Build a movie out of a series of fits files.
 
@@ -389,6 +399,7 @@ def create_movie(files, output_movie=None, images_directory=None,
         pool = mp.Pool() if multiprocess else NullPool()
         fn = partial(build_image, outdir=image_dir,
                      median_behaviour=median_behaviour,
+                     include_increment=include_increment,
                      nimages=len(sorted_files))
         pool.map(fn, enumerate(sorted_files))
 
@@ -412,6 +423,7 @@ def main(args):
         delete_tempdir=not args.no_delete_tmpdir,
         use_mencoder=args.use_mencoder,
         no_time_series=args.no_time_series,
+        include_increment=not args.no_include_increment,
         verbose=args.verbose,
     )
 
@@ -442,6 +454,9 @@ def parse_args():
                         help='Verbose logging')
     parser.add_argument('-T', '--no-time-series', action='store_true',
                         default=False, help='Disable time series plot')
+    parser.add_argument('-I', '--no-include-increment', default=False,
+                        action='store_true',
+                        help='Disable increment counter in output filename')
     return parser.parse_args()
 
 
