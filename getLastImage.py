@@ -73,10 +73,11 @@ for cam in cams:
 		# go into the last action directory
 		if das[cam] != None:
 			os.chdir("%s/%s" % (das[cam],cams[cam][-1]))
-		
+			logger.info("Moving to %s/%s" % (das[cam],cams[cam][-1]))
 			# get the last image
 			t=sorted(g.glob('*.fits'))
 			pngfile="%s.png" % (t[-1])
+			logger.info("PNG file to make is %s.png" % (t[-1]))
 			
 			if len(t)>0 and pngfile not in os.listdir('%s/last_imgs/%s/' % (cron_dir,cam)):
 				create_movie([t[-1]],images_directory='%s/last_imgs/%s' % (cron_dir,cam),
@@ -84,25 +85,32 @@ for cam in cams:
 			
 				here=os.getcwd()
 				os.chdir("/usr/local/cron/last_imgs/%s" % (cam))
+				logger.info("Moving to /usr/local/cron/last_imgs/%s" % (cam))
 				t2=sorted(g.glob('*.png'))
 				
 				try:
 					f=open('last_img.log').readline()
 				except IOError:
 					f="XXX"
+				logger.info("Last image: %s" % (f))
 				
 				if f != t2[-1]:
 					os.system('cp %s %s/cam_%s.png' % (t2[-1],web_dir,cam))
+					logger.info("Copying %s to %s/cam_%s.png" % (t2[-1],web_dir,cam))
 					f3=open('last_img.log','w')
 					f3.write(t2[-1])
 					f3.close()
+					logger.info('last_img.log updated with %s' % t[-1])
+					
 				else:
 					print "Last image already up to date, skipping..."
-				
+					logger.info('Last image up to date')
+					
 				os.chdir(here)
+				logger.info('Moving to %s' % (here))
 			
 			else:
-				print "No new fits images to convert, skipping %s..." % (das[cam])
+				logger.info("No new fits images to convert, skipping %s..." % (das[cam]))
 			
 			os.chdir('../../')
-
+			logger.info('Moving to ../../')
