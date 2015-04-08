@@ -92,39 +92,40 @@ for cam in cams:
 			logger.info("Moving to %s/%s" % (das[cam],cams[cam][-1]))
 			# get the last image
 			t=sorted(g.glob('*.fits'))
-			pngfile="%s.png" % (t[-1])
-			logger.info("PNG file to make is %s.png" % (t[-1]))
 			
-			if len(t)>0 and pngfile not in os.listdir('%s/last_imgs/%s/' % (cron_dir,cam)):
-				create_movie([t[-1]],images_directory='%s/last_imgs/%s' % (cron_dir,cam),
-					no_time_series=True,include_increment=False,clobber_images_directory=False)
-			
-				here=os.getcwd()
-				os.chdir("%s/last_imgs/%s" % (cron_dir,cam))
-				logger.info("Moving to %s/last_imgs/%s" % (cron_dir,cam))
+			if len(t)>0:
+			 	pngfile="%s.png" % (t[-1])
+				logger.info("PNG file to make is %s.png" % (t[-1]))
+			 	if pngfile not in os.listdir('%s/last_imgs/%s/' % (cron_dir,cam)):
+					create_movie([t[-1]],images_directory='%s/last_imgs/%s' % (cron_dir,cam),
+						no_time_series=True,include_increment=False,clobber_images_directory=False)
 				
-				try:
-					f=open('last_img.log').readline()
-				except IOError:
-					f="XXX"
-				logger.info("Last image: %s" % (f))
-				
-				if f != pngfile:
-					os.system('cp %s %s/cam_%s.png' % (pngfile,web_dir,cam))
-					logger.info("Copying %s to %s/cam_%s.png" % (pngfile,web_dir,cam))
-					f3=open('last_img.log','w')
-					f3.write(pngfile)
-					f3.close()
-					logger.info('last_img.log updated with %s' % pngfile)
-					os.system('rm %s' % (pngfile))
-					logger.info('Removing %s' % pngfile)
+					here=os.getcwd()
+					os.chdir("%s/last_imgs/%s" % (cron_dir,cam))
+					logger.info("Moving to %s/last_imgs/%s" % (cron_dir,cam))
 					
-				else:
-					print "Last image already up to date, skipping..."
-					logger.info('Last image up to date')
+					try:
+						f=open('last_img.log').readline()
+					except IOError:
+						f="XXX"
+					logger.info("Last image: %s" % (f))
 					
-				os.chdir(here)
-				logger.info('Moving to %s' % (here))
+					if f != pngfile:
+						os.system('cp %s %s/cam_%s.png' % (pngfile,web_dir,cam))
+						logger.info("Copying %s to %s/cam_%s.png" % (pngfile,web_dir,cam))
+						f3=open('last_img.log','w')
+						f3.write(pngfile)
+						f3.close()
+						logger.info('last_img.log updated with %s' % pngfile)
+						os.system('rm %s' % (pngfile))
+						logger.info('Removing %s' % pngfile)
+						
+					else:
+						print "Last image already up to date, skipping..."
+						logger.info('Last image up to date')
+						
+					os.chdir(here)
+					logger.info('Moving to %s' % (here))
 			
 			else:
 				logger.info("No new fits images to convert, skipping %s..." % (das[cam]))
