@@ -81,7 +81,7 @@ for cam in cams:
 			
 			if len(t)>0 and pngfile not in os.listdir('%s/last_imgs/%s/' % (cron_dir,cam)):
 				create_movie([t[-1]],images_directory='%s/last_imgs/%s' % (cron_dir,cam),
-					no_time_series=True,include_increment=False)
+					no_time_series=True,include_increment=False,clobber_images_directory=False)
 			
 				here=os.getcwd()
 				os.chdir("/usr/local/cron/last_imgs/%s" % (cam))
