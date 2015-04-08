@@ -227,19 +227,17 @@ def generate_movie(image_directory, output_filename, fps=15,
         sp.check_call(cmd)
 
 
-def ensure_dir(d):
+def ensure_dir(d, clobber=True):
     '''
     Ensure a directory is present by attempting to make it, then removing and
     trying again if an error occurs
     '''
-    try:
-        os.makedirs(d)
-    except OSError:
-        logger.debug('Cannot create directory %s, it already exists', d)
-        shutil.rmtree(d)
-        os.makedirs(d)
+    if os.path.isdir(d):
+        if clobber:
+            shutil.rmtree(d)
+            os.makedirs(d)
     else:
-        logger.debug('Temporary directory %s created', d)
+        os.makedirs(d)
 
 
 @contextmanager
