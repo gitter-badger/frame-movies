@@ -153,6 +153,9 @@ def build_image((i, input_fname), outdir, median_behaviour,
     header, image_data = extract_image_data(input_fname)
     med_image = np.median(image_data)
     z1, z2 = (med_image * frame_min, med_image * frame_max)
+    if z1 > z2:
+        z1, z2 = z2, z1
+
     axes[0].imshow(image_data, interpolation='None', origin='lower',
                    cmap=plt.cm.afmhot, vmin=z1, vmax=z2)
     for dimension in ['xaxis', 'yaxis']:
