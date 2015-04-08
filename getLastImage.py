@@ -76,7 +76,7 @@ for cam in cams:
 		
 			# get the last image
 			t=sorted(g.glob('*.fits'))
-			pngfile="%s.png" % (t[-1].split(".")[0])
+			pngfile="%s.png" % (t[-1])
 			
 			if len(t)>0 and pngfile not in os.listdir('%s/last_imgs/%s/' % (cron_dir,cam)):
 				create_movie([t[-1]],images_directory='%s/last_imgs/%s' % (cron_dir,cam),
