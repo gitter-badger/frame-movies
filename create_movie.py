@@ -126,7 +126,7 @@ def build_image((i, input_fname), outdir, median_behaviour,
         Number of images in the complete set
     '''
     output_fname = construct_output_filename(outdir, input_fname, i,
-            include_increment=include_increment)
+                                             include_increment=include_increment)
     if nimages is None:
         logger.info('Building image %s', i + 1)
     else:
@@ -227,23 +227,22 @@ def generate_movie(image_directory, output_filename, fps=15,
         sp.check_call(cmd)
 
 
-def ensure_dir(d):
+def ensure_dir(d, clobber=True):
     '''
     Ensure a directory is present by attempting to make it, then removing and
     trying again if an error occurs
     '''
-    try:
-        os.makedirs(d)
-    except OSError:
-        logger.debug('Cannot create directory %s, it already exists', d)
-        shutil.rmtree(d)
-        os.makedirs(d)
+    if os.path.isdir(d):
+        if clobber:
+            shutil.rmtree(d)
+            os.makedirs(d)
     else:
-        logger.debug('Temporary directory %s created', d)
+        os.makedirs(d)
 
 
 @contextmanager
-def temporary_directory(images_dir=None, delete=True, *args, **kwargs):
+def temporary_directory(images_dir=None, delete=True, clobber=True,
+                        *args, **kwargs):
     '''
     Create either a temporary directory which is removed after use, or ensuring
     a custom directory exists if passed. Args and kwargs are passed on to
@@ -257,7 +256,7 @@ def temporary_directory(images_dir=None, delete=True, *args, **kwargs):
         If temporary directory is created, delete it when finished?
     '''
     if images_dir is not None:
-        ensure_dir(images_dir)
+        ensure_dir(images_dir, clobber=clobber)
         yield images_dir
     else:
         dirname = tempfile.mkdtemp(*args, **kwargs)
@@ -333,6 +332,7 @@ class TimeSeries(object):
 def create_movie(files, output_movie=None, images_directory=None,
                  delete_tempdir=True, sort=True, multiprocess=True, fps=15,
                  use_mencoder=False, no_time_series=False,
+                 clobber_images_directory=True,
                  include_increment=True, verbose=False):
     '''
     Build a movie out of a series of fits files.
@@ -379,6 +379,7 @@ def create_movie(files, output_movie=None, images_directory=None,
         logger.warning('Not creating movie')
 
     with temporary_directory(images_directory,
+                             clobber=clobber_images_directory,
                              delete=delete_tempdir) as image_dir:
 
         logger.info("Building into {}".format(image_dir))
@@ -424,6 +425,7 @@ def main(args):
         use_mencoder=args.use_mencoder,
         no_time_series=args.no_time_series,
         include_increment=not args.no_include_increment,
+        clobber_images_directory=not args.no_clobber_images_dir,
         verbose=args.verbose,
     )
 
@@ -457,6 +459,9 @@ def parse_args():
     parser.add_argument('-I', '--no-include-increment', default=False,
                         action='store_true',
                         help='Disable increment counter in output filename')
+    parser.add_argument('-C', '--no-clobber-images-dir', default=False,
+                        action='store_true',
+                        help='Do not overwrite images directory')
     return parser.parse_args()
 
 

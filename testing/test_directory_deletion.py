@@ -53,3 +53,27 @@ def test_directory_created_with_name_with_deletion(dir_path, tmp_dirname):
 def test_ensure_dir(dir_path):
     c.ensure_dir(dir_path)
     assert os.path.isdir(dir_path)
+
+
+def test_ensure_dir_recreates_by_default(tmpdir, tmp_dirname):
+    dirname = tmpdir.mkdir(tmp_dirname)
+    assert os.path.isdir(str(dirname))
+    tmp_fname = 'test.txt'
+    fname = dirname.join(tmp_fname)
+    fname.write('Hello world')
+    assert os.path.isfile(str(fname))
+
+    c.ensure_dir(str(dirname))
+    assert not os.path.isfile(str(fname))
+
+
+def test_ensure_dir_leaves_if_requested(tmpdir, tmp_dirname):
+    dirname = tmpdir.mkdir(tmp_dirname)
+    assert os.path.isdir(str(dirname))
+    tmp_fname = 'test.txt'
+    fname = dirname.join(tmp_fname)
+    fname.write('Hello world')
+    assert os.path.isfile(str(fname))
+
+    c.ensure_dir(str(dirname), clobber=False)
+    assert os.path.isfile(str(fname))
