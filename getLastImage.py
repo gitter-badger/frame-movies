@@ -1,8 +1,6 @@
 # to do:
 #  add top of file
 #  test in morning
-#  add token to ignore the image_id sequence in create_movie
-#  add logging
 #
 
 import pymysql 
@@ -16,7 +14,7 @@ me=getpass.getuser()
 if me == "ops":
 	topdir="/ngts"
 	convert_loc="/usr/local/bin"
-	cron_dir="/usr/local/cron"
+	cron_dir="/usr/local/cron/work"
 	web_dir="/home/ops/ngts/prism/monitor/img"
 else:
 	print "Whoami!?"
@@ -86,7 +84,6 @@ for cam in cams:
 				here=os.getcwd()
 				os.chdir("/usr/local/cron/last_imgs/%s" % (cam))
 				logger.info("Moving to /usr/local/cron/last_imgs/%s" % (cam))
-				t2=sorted(g.glob('*.png'))
 				
 				try:
 					f=open('last_img.log').readline()
@@ -94,13 +91,15 @@ for cam in cams:
 					f="XXX"
 				logger.info("Last image: %s" % (f))
 				
-				if f != t2[-1]:
-					os.system('cp %s %s/cam_%s.png' % (t2[-1],web_dir,cam))
-					logger.info("Copying %s to %s/cam_%s.png" % (t2[-1],web_dir,cam))
+				if f != pngfile:
+					os.system('cp %s %s/cam_%s.png' % (pngfile,web_dir,cam))
+					logger.info("Copying %s to %s/cam_%s.png" % (pngfile,web_dir,cam))
 					f3=open('last_img.log','w')
-					f3.write(t2[-1])
+					f3.write(pngfile)
 					f3.close()
-					logger.info('last_img.log updated with %s' % t[-1])
+					logger.info('last_img.log updated with %s' % pngfile)
+					os.system('rm %s' % (pngfile))
+					logger.info('Removing %s' % pngfile)
 					
 				else:
 					print "Last image already up to date, skipping..."
