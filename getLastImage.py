@@ -1,5 +1,21 @@
+#!/usr/bin/env python
+###############################################################################
+#                                                                             #
+#          Script to get the last image from NGTS and display on webpage      #
+#                                    v1.0                                     #
+#                               James McCormac                                #
+#                                                                             #
+# Version History:                                                            #
+#	20150408	v1.0	Code written and tested on par-ds                     #
+#                                                                             #
+###############################################################################
+#
+# process:
+#	grab all the actions from 1 day ago, split according to camera
+#	go to last action and get the last image
+#	only make pngs and upload to webserver if needed
+#
 # to do:
-#  add top of file
 #  test in morning
 #
 
@@ -33,6 +49,7 @@ cams={801:[],
 	810:[],
 	811:[],
 	812:[],
+	813:[],
 	899:[]}
 
 # this should really come from the db...
@@ -50,6 +67,7 @@ das={801:None,
 	810:None,
 	811:None,
 	812:None,
+	813:None,
 	899:None}
 	
 # connect to database
@@ -82,8 +100,8 @@ for cam in cams:
 					no_time_series=True,include_increment=False,clobber_images_directory=False)
 			
 				here=os.getcwd()
-				os.chdir("/usr/local/cron/last_imgs/%s" % (cam))
-				logger.info("Moving to /usr/local/cron/last_imgs/%s" % (cam))
+				os.chdir("%s/last_imgs/%s" % (cron_dir,cam))
+				logger.info("Moving to %s/last_imgs/%s" % (cron_dir,cam))
 				
 				try:
 					f=open('last_img.log').readline()
