@@ -11,13 +11,13 @@ verify_args() {
 }
 
 submit() {
-    echo "$@" | qsub -S /bin/bash -cwd -sync n -pe parallel 24 -N build-images
+    echo "$@" | qsub -S /bin/bash -cwd -sync n -pe parallel 12 -N build-images
 }
 
 build_images() {
     local directory="$1"
     local output_name="$2"
-    echo /home/sw/anaconda/bin/python ./create_movie.py -o ${output_name} "$(getfiles ${directory})"
+    echo /home/sw/anaconda/bin/python ./create_movie.py --use-mencoder -o ${output_name} "$(getfiles ${directory})"
 }
 
 getfiles() {

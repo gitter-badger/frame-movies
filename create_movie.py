@@ -207,7 +207,7 @@ def generate_movie(image_directory, output_filename, fps=15,
     n_cpu = mp.cpu_count()
     with change_directory(image_directory):
         if use_mencoder:
-            cmd = list(map([
+            cmd = list(map(str, [
                 'mencoder', 'mf://*.png', '-mf',
                 'w=800:h=600:fps={}:type=png'.format(fps),
                 '-ovc', 'x264', '-x264encopts',
