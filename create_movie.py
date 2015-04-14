@@ -25,6 +25,8 @@ logger = logging.getLogger(__file__)
 mplogger = mp.log_to_stderr()
 mplogger.setLevel('WARNING')
 
+ALLOWED_RESIZE_FACTORS = {2, 4, 8}
+
 
 class NullPool(object):
 
@@ -169,6 +171,9 @@ def build_image((i, input_fname), outdir, median_behaviour,
     header, image_data = extract_image_data(input_fname)
 
     if resize_factor is not None:
+        if resize_factor not in ALLOWED_RESIZE_FACTORS:
+            raise RuntimeError("Invalid resize factor given, allowed: {allowed}".format(
+                allowed=ALLOWED_RESIZE_FACTORS))
         new_shape = (image_data.shape[0] // resize_factor,
                 image_data.shape[1] // resize_factor)
         image_data = rebin(image_data, new_shape)
@@ -494,7 +499,8 @@ def parse_args():
                         action='store_true',
                         help='Do not overwrite images directory')
     parser.add_argument('-r', '--resize', help='Resize images before rendering',
-                        type=int, choices=[2, 4, 8], required=False)
+                        type=int, choices=sorted(list(ALLOWED_RESIZE_FACTORS)),
+                        required=False)
     return parser.parse_args()
 
 
