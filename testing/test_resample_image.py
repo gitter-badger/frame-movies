@@ -17,3 +17,9 @@ def test_rebin(image):
 def test_rebin_values(image):
     rebinned = rebin(image, (4, 4))
     assert rebinned[0][0] == 16
+
+
+def test_values_do_not_crash(image):
+    rebin(image, (8, 8))
+    rebin(image, (4, 4))
+    rebin(image, (2, 2))
