@@ -113,7 +113,7 @@ def extract_image_data(input_fname):
 
 def build_image((i, input_fname), outdir, median_behaviour,
                 frame_min=0.8, frame_max=1.2, nimages=None,
-                include_increment=True):
+                resize_factor=None, include_increment=True):
     '''
     Given a file, render a png of the output to the ``outdir`` directory.
 
@@ -134,6 +134,9 @@ def build_image((i, input_fname), outdir, median_behaviour,
 
     :param frame_max:
         Multiple of the median to set the upper value for the colour scale
+
+    :param resize_factor:
+        Downsample the images by this factor before rendering the png
 
     :param nimages:
         Number of images in the complete set
@@ -164,6 +167,12 @@ def build_image((i, input_fname), outdir, median_behaviour,
         ]
 
     header, image_data = extract_image_data(input_fname)
+
+    if resize_factor is not None:
+        new_shape = (image_data.shape[0] // resize_factor,
+                image_data.shape[1] // resize_factor)
+        image_data = rebin(image_data, new_shape)
+
     med_image = np.median(image_data)
     z1, z2 = (med_image * frame_min, med_image * frame_max)
     if z1 > z2:
@@ -349,6 +358,7 @@ def create_movie(files, output_movie=None, images_directory=None,
                  delete_tempdir=True, sort=True, multiprocess=True, fps=15,
                  use_mencoder=False, no_time_series=False,
                  clobber_images_directory=True,
+                 resize_factor=None,
                  include_increment=True, verbose=False):
     '''
     Build a movie out of a series of fits files.
@@ -377,6 +387,9 @@ def create_movie(files, output_movie=None, images_directory=None,
 
     :param fps:
         Frames per second of the final movie
+
+    :param resize_factor:
+        Downsample the images by this factor before rendering the png
 
     :param verbose:
         Print more verbose logging information
@@ -417,6 +430,7 @@ def create_movie(files, output_movie=None, images_directory=None,
         fn = partial(build_image, outdir=image_dir,
                      median_behaviour=median_behaviour,
                      include_increment=include_increment,
+                     resize_factor=resize_factor,
                      nimages=len(sorted_files))
         pool.map(fn, enumerate(sorted_files))
 
@@ -442,6 +456,7 @@ def main(args):
         no_time_series=args.no_time_series,
         include_increment=not args.no_include_increment,
         clobber_images_directory=not args.no_clobber_images_dir,
+        resize_factor=args.resize,
         verbose=args.verbose,
     )
 
@@ -478,6 +493,8 @@ def parse_args():
     parser.add_argument('-C', '--no-clobber-images-dir', default=False,
                         action='store_true',
                         help='Do not overwrite images directory')
+    parser.add_argument('-r', '--resize', help='Resize images before rendering',
+                        type=int, choices=[2, 4, 8], required=False)
     return parser.parse_args()
 
 
