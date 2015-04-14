@@ -39,6 +39,19 @@ class NullPool(object):
         return map(fn, args)
 
 
+def rebin(a, shape, total=True):
+    '''
+    Image rebinning routine
+    http://stackoverflow.com/a/8090605/56711
+    '''
+    sh = shape[0],a.shape[0]//shape[0],shape[1],a.shape[1]//shape[1]
+    if total:
+        fn = np.sum
+    else:
+        fn = np.mean
+    return fn(fn(a.reshape(sh), axis=-1), axis=1)
+
+
 def pack_images(dirname, output_name, kind='png'):
     '''
     Compress the png images for easy copying.
