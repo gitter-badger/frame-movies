@@ -334,7 +334,7 @@ def main():
 	if args.montage:
 		make_montage(movie_dir,das)
 	if args.movie:
-		make_movie(movie_dir,"movie.mp4")
+		make_movie(movie_dir,"%s/movie.mp4" % (movie_dir))
 
 if __name__=='__main__':
 	main()			
