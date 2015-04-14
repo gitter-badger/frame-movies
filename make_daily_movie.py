@@ -150,12 +150,12 @@ def getDatetime(t):
 	get the date and time from a raw image filename
 	and create a datetime variable
 	'''
-	ychk=int(t[14:18])
-	mthchk=int(t[18:20])
-	dchk=int(t[20:22])
-	hchk=int(t[22:24])
-	minchk=int(t[24:26])
-	schk=int(t[26:28])
+	ychk=int(t[8:12])
+	mthchk=int(t[12:14])
+	dchk=int(t[14:16])
+	hchk=int(t[16:18])
+	minchk=int(t[18:20])
+	schk=int(t[20:22])
 	
 	x=datetime.datetime(year=ychk,month=mthchk,
 		day=dchk,hour=hchk,minute=minchk,second=schk)
