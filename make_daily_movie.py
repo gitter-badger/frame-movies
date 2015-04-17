@@ -2,23 +2,26 @@
 ###############################################################################
 #                                                                             #
 #            Script to make a movie from the previous night's images          #
-#                                    v1.1                                     #
+#                                    v1.2                                     #
 #                               James McCormac                                #
 #                                                                             #
 # Version History:                                                            #
 #	20150319	v1.0	Code written                                          #
 #   20150321	v1.1	Added montaging + logger                              #
+#   20150321	v1.2	Added spltting of png making                          #
 #                                                                             #
 ###############################################################################
 #
 # process:
-#	get a list of actions from the previous night
-#	use Simon's create_movie code to generate the pngs
-#	use imagemagick to montage the pngs (getCameraMovie.py snippet)
-#	use ffmpeg to make the movie of the montaged pngs
+#	1. get a list of actions from the previous night
+#	2. use Simon's create_movie code to generate the pngs
+#		splitting the work 3 cams per aux node
+#	3. use imagemagick to montage the pngs (getCameraMovie.py snippet)
+#	4. use ffmpeg to make the movie of the montaged pngs
+#		steps 3+4 happen on one aux node
 #
 # to do: 
-#	add movie making with ffmpeg (generate_movie)
+#	use ngwhereis for the das locations
 #	add a timer for the whole process
 #
 
@@ -41,7 +44,7 @@ if me == 'James':
 	movie_dir="/Volumes/DATA/ngts/paranal/12Cams/movie/"
 	top_dir="/Volumes/DATA/ngts/paranal/12Cams/"
 if me == 'ops':
-	movie_dir="/local/movie/"
+	movie_dir="/ngts/aux07/movie/"
 	top_dir="/ngts/"
 
 # empty dictionary for the actions for each camera
@@ -60,13 +63,14 @@ cams={801:[],
 	899:[]}
 
 # set the key to the das machines for each camera
+# need to modify this to use ngwhereis!
 das={801:None,
 	802:'das06',
 	803:'das09',
 	804:'das04',
 	805:None,
 	806:None,
-	807:None,
+	807:'das07',
 	808:None,
 	809:None,
 	810:None,
@@ -94,6 +98,7 @@ start_id={801:-1,
 
 def ArgParse():
 	parser=ap.ArgumentParser()
+	parser.add_argument("clist",help="comma separated list of cameras to run")
 	parser.add_argument("--pngs",help="make the PNG files",action="store_true")
 	parser.add_argument("--montage",help="montage all PNG files",action="store_true")
 	parser.add_argument("--movie",help="make movie from montaged PNG files",action="store_true")
@@ -101,7 +106,7 @@ def ArgParse():
 	return args
 
 
-def make_pngs():
+def make_pngs(clist):
 	'''
 	Get all the images from yesterday and make pngs 
 	for the daily montage. PNGs will be stored in 
@@ -133,17 +138,22 @@ def make_pngs():
 	
 	# now we have the action ids go through and create the images for each 
 	for i in cams:
-		if len(cams[i]) > 0 and das[i] != None:
-			if os.path.exists(movie_dir) == False:
-				os.mkdir(movie_dir)	
-			logger.info(movie_dir)
-			for j in cams[i]:
-				logger.info("%s%s/%s/*.fits" % (top_dir,das[i],j))
-				t=sorted(g.glob('%s%s/%s/*.fits' % (top_dir,das[i],j)))
-				
-				camera_movie_dir=movie_dir+das[i]
-				create_movie(t,images_directory=camera_movie_dir,include_increment=False,clobber_images_directory=False,resize_factor=4)
-
+		# only do those listed on command line
+		if str(i) in clist:
+			if len(cams[i]) > 0 and das[i] != None:
+				if os.path.exists(movie_dir) == False:
+					os.mkdir(movie_dir)	
+				logger.info(movie_dir)
+				for j in cams[i]:
+					logger.info("%s%s/%s/*.fits" % (top_dir,das[i],j))
+					t=sorted(g.glob('%s%s/%s/*.fits' % (top_dir,das[i],j)))
+					
+					camera_movie_dir=movie_dir+das[i]
+					create_movie(t,images_directory=camera_movie_dir,include_increment=False,clobber_images_directory=False,resize_factor=4)
+		else:
+			continue
+			
+		
 
 def getDatetime(t):
 	'''
@@ -329,8 +339,26 @@ def make_movie(movie_dir,movie):
 
 def main():	
 	args=ArgParse()
+	
+	ex=0
+	# check the camera list
+	csplit=args.clist.split(',')
+	if len(csplit) < 1:
+		ex+=1
+	
+	else:
+		for i in csplit:
+			if i not in cams:
+				ex+=1
+				
+	if ex > 0:
+		logger.fatal("Problem in clist...")
+		logger.fatal("Enter list like 801,802,803,...8[n]")
+		logger.fatal("Exiting...")
+		sys.exit(1)
+		
 	if args.pngs:
-		make_pngs()
+		make_pngs(args.clist)
 	if args.montage:
 		make_montage(movie_dir,das)
 	if args.movie:
