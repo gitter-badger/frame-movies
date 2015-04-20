@@ -25,7 +25,7 @@
 #	add a timer for the whole process
 #
 
-import os, os.path, datetime
+import os, os.path, datetime, sys
 import pymysql 
 import logging
 import glob as g
