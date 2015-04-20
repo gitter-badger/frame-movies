@@ -369,7 +369,7 @@ def main():
 		make_movie(movie_dir,"%s/movie.mp4" % (movie_dir))
 	
 	t2=datetime.datetime.utcnow()
-	dt=(t2-t1).total_seconds/60.
+	dt=(t2-t1).total_seconds()/60.
 	
 	print "Runtime: %.2f mins" % (dt) 
 	
