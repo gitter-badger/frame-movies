@@ -150,6 +150,8 @@ def make_pngs(clist):
 					
 					camera_movie_dir=movie_dir+das[i]
 					create_movie(t,images_directory=camera_movie_dir,include_increment=False,clobber_images_directory=False,resize_factor=4)
+			else:
+				logger.warn('No images for %d' % (i))
 		else:
 			continue
 			
@@ -343,14 +345,11 @@ def main():
 	ex=0
 	# check the camera list
 	csplit=args.clist.split(',')
-	print csplit
 	if len(csplit) < 1:
 		ex+=1
 	else:
 		for i in csplit:
-			print i
 			if int(i) not in cams:
-				print "err"
 				ex+=1
 				
 	if ex > 0:
