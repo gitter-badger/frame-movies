@@ -344,25 +344,24 @@ def main():
 	
 	# get time of start
 	t1=datetime.datetime.utcnow()
-	
-	ex=0
-	# check the camera list
-	csplit=args.pngs.split(',')
-	if len(csplit) < 1:
-		ex+=1
-	else:
-		for i in csplit:
-			if int(i) not in cams:
-				ex+=1
-				
-	if ex > 0:
-		logger.fatal("Problem in pngs...")
-		logger.fatal("Enter list like --pngs 801,802,803,...8[n]")
-		logger.fatal("Exiting...")
-		sys.exit(1)
-		
+			
 	if args.pngs:
-		make_pngs(args.clist)
+		ex=0
+		# check the camera list
+		csplit=args.pngs.split(',')
+		if len(csplit) < 1:
+			ex+=1
+		else:
+			for i in csplit:
+				if int(i) not in cams:
+					ex+=1			
+		if ex > 0:
+			logger.fatal("Problem in pngs...")
+			logger.fatal("Enter list like --pngs 801,802,803,...8[n]")
+			logger.fatal("Exiting...")
+			sys.exit(1)
+		else:
+			make_pngs(args.pngs)	
 	if args.montage:
 		make_montage(movie_dir,das)
 	if args.movie:
