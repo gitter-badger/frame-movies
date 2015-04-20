@@ -372,7 +372,7 @@ def main():
 		os.system('scp %s jmcc@ngts.warwick.ac.uk:/srv/www.ngts/ops/daily_movies/' % (movie_name))
 		
 		# clean up the pngs
-		os.system('rm /local/movie/tiled*.png')
+		os.system('rm /ngts/aux07/movie/tiled*.png')
 		for i in das:
 			if das[i] != None:
 				os.system('rm /ngts/aux07/movie/%d/IMAGE*.png' % (das[i]))
