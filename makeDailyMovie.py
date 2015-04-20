@@ -365,8 +365,18 @@ def main():
 	if args.montage:
 		make_montage(movie_dir,das)
 	if args.movie:
-		make_movie(movie_dir,"%s/movie_%s.mp4" % (movie_dir, (datetime.datetime.utcnow()-timedelta(days=1)).strftime('%Y%m%d')))
-	
+		movie_date=(datetime.datetime.utcnow()-timedelta(days=1)).strftime('%Y%m%d')
+		movie_name="%s/movie_%s.mp4" % (movie_dir,movie_date)
+		make_movie(movie_dir,movie_name)
+		# send to warwick webserver
+		os.system('scp %s jmcc@ngts.warwick.ac.uk:/srv/www.ngts/ops/daily_movies/' % (movie_name))
+		
+		# clean up the pngs
+		os.system('rm /local/movie/tiled*.png')
+		for i in das:
+			if das[i] != None:
+				os.system('rm /ngts/aux07/movie/%d/IMAGE*.png' % (das[i]))
+		
 	t2=datetime.datetime.utcnow()
 	dt=(t2-t1).total_seconds()/60.
 	
