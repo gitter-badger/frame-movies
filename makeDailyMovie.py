@@ -26,6 +26,7 @@
 #
 
 import os, os.path, datetime, sys, time
+from datetime import timedelta
 import pymysql 
 import logging
 import glob as g
@@ -98,8 +99,7 @@ start_id={801:-1,
 
 def ArgParse():
 	parser=ap.ArgumentParser()
-	parser.add_argument("clist",help="comma separated list of cameras to run")
-	parser.add_argument("--pngs",help="make the PNG files",action="store_true")
+	parser.add_argument("--pngs",help="make the PNG files")
 	parser.add_argument("--montage",help="montage all PNG files",action="store_true")
 	parser.add_argument("--movie",help="make movie from montaged PNG files",action="store_true")
 	args=parser.parse_args()
@@ -347,7 +347,7 @@ def main():
 	
 	ex=0
 	# check the camera list
-	csplit=args.clist.split(',')
+	csplit=args.pngs.split(',')
 	if len(csplit) < 1:
 		ex+=1
 	else:
@@ -356,8 +356,8 @@ def main():
 				ex+=1
 				
 	if ex > 0:
-		logger.fatal("Problem in clist...")
-		logger.fatal("Enter list like 801,802,803,...8[n]")
+		logger.fatal("Problem in pngs...")
+		logger.fatal("Enter list like --pngs 801,802,803,...8[n]")
 		logger.fatal("Exiting...")
 		sys.exit(1)
 		
@@ -366,7 +366,7 @@ def main():
 	if args.montage:
 		make_montage(movie_dir,das)
 	if args.movie:
-		make_movie(movie_dir,"%s/movie.mp4" % (movie_dir))
+		make_movie(movie_dir,"%s/movie_%s.mp4" % (movie_dir, (datetime.datetime.utcnow()-timedelta(days=1)).strftime('%Y%m%d')))
 	
 	t2=datetime.datetime.utcnow()
 	dt=(t2-t1).total_seconds()/60.
