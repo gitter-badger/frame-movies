@@ -349,7 +349,7 @@ def main():
 	else:
 		for i in csplit:
 			print i
-			if i not in cams:
+			if int(i) not in cams:
 				print "err"
 				ex+=1
 				
