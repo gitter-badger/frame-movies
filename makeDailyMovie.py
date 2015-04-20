@@ -369,7 +369,7 @@ def main():
 		movie_name="%s/movie_%s.mp4" % (movie_dir,movie_date)
 		make_movie(movie_dir,movie_name)
 		# send to warwick webserver
-		os.system('scp %s jmcc@ngts.warwick.ac.uk:/srv/www.ngts/ops/daily_movies/' % (movie_name))
+		os.system('scp %s jmcc@ngts.warwick.ac.uk:/srv/www/ngts/ops/daily_movies/' % (movie_name))
 		
 		# clean up the pngs
 		os.system('rm /ngts/aux07/movie/tiled*.png')
