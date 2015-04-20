@@ -343,11 +343,9 @@ def main():
 	ex=0
 	# check the camera list
 	csplit=args.clist.split(',')
+	print csplit
 	if len(csplit) < 1:
 		ex+=1
-	
-	
-	print csplit
 	else:
 		for i in csplit:
 			print i
