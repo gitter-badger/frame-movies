@@ -25,7 +25,7 @@
 #	add a timer for the whole process
 #
 
-import os, os.path, datetime, sys
+import os, os.path, datetime, sys, time
 import pymysql 
 import logging
 import glob as g
@@ -342,6 +342,9 @@ def make_movie(movie_dir,movie):
 def main():	
 	args=ArgParse()
 	
+	# get time of start
+	t1=datetime.datetime.utcnow()
+	
 	ex=0
 	# check the camera list
 	csplit=args.clist.split(',')
@@ -364,7 +367,12 @@ def main():
 		make_montage(movie_dir,das)
 	if args.movie:
 		make_movie(movie_dir,"%s/movie.mp4" % (movie_dir))
-
+	
+	t2=datetime.datetime.utcnow()
+	dt=(t2-t1).total_seconds/60.
+	
+	print "Runtime: %.2f mins" % (dt) 
+	
 if __name__=='__main__':
 	main()			
 	
