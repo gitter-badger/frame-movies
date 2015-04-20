@@ -366,7 +366,7 @@ def main():
 		make_montage(movie_dir,das)
 	if args.movie:
 		movie_date=(datetime.datetime.utcnow()-timedelta(days=1)).strftime('%Y%m%d')
-		movie_name="%s/movie_%s.mp4" % (movie_dir,movie_date)
+		movie_name="%s/daily_movies/movie_%s.mp4" % (movie_dir,movie_date)
 		make_movie(movie_dir,movie_name)
 		# send to warwick webserver
 		os.system('scp %s jmcc@ngts.warwick.ac.uk:/srv/www/ngts/ops/daily_movies/' % (movie_name))
