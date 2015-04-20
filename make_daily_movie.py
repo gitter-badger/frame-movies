@@ -346,9 +346,13 @@ def main():
 	if len(csplit) < 1:
 		ex+=1
 	
+	
+	print csplit
 	else:
 		for i in csplit:
+			print i
 			if i not in cams:
+				print "err"
 				ex+=1
 				
 	if ex > 0:
