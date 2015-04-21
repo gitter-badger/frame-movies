@@ -375,7 +375,7 @@ def main():
 		os.system('rm /ngts/aux07/movie/tiled*.png')
 		for i in das:
 			if das[i] != None:
-				os.system('rm /ngts/aux07/movie/%d/IMAGE*.png' % (das[i]))
+				os.system('rm /ngts/aux07/movie/%s/IMAGE*.png' % (das[i]))
 		
 	t2=datetime.datetime.utcnow()
 	dt=(t2-t1).total_seconds()/60.
