@@ -9,6 +9,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import os
 import multiprocessing as mp
+import multiprocessing.dummy as threadmp
 import tempfile
 from contextlib import contextmanager
 from functools import partial
@@ -29,13 +30,13 @@ ALLOWED_RESIZE_FACTORS = {2, 4, 8}
 
 
 class NullPool(object):
-
     '''
     Null object pattern for a ``multiprocessing.Pool`` object, when
     multiprocessing is not used. Provides the same interface.
     '''
 
-    def __init__(self, *args, **kwargs): pass
+    def __init__(self, *args, **kwargs):
+        pass
 
     def map(self, fn, args):
         return map(fn, args)
@@ -46,7 +47,7 @@ def rebin(a, shape, total=True):
     Image rebinning routine
     http://stackoverflow.com/a/8090605/56711
     '''
-    sh = shape[0],a.shape[0]//shape[0],shape[1],a.shape[1]//shape[1]
+    sh = shape[0], a.shape[0] // shape[0], shape[1], a.shape[1] // shape[1]
     if total:
         fn = np.sum
     else:
@@ -72,8 +73,7 @@ def pack_images(dirname, output_name, kind='png'):
     full_out_path = os.path.realpath(output_name)
     with change_directory(dirname):
         cmd = ['tar', 'czf', full_out_path]
-        cmd.extend([fname for fname in os.listdir('.')
-                    if '.png' in fname])
+        cmd.extend([fname for fname in os.listdir('.') if '.png' in fname])
         str_cmd = map(str, cmd)
         logger.debug("Running command [{}]".format(' '.join(str_cmd)))
         sp.check_call(str_cmd)
@@ -105,17 +105,18 @@ def extract_image_data(input_fname):
 
     if image_data.shape == (2048, 2088):
         overscan = image_data[4:, -15:].mean()
-        logger.debug('Image is raw, subtracting overscan {}'.format(
-            overscan)
-        )
+        logger.debug('Image is raw, subtracting overscan {}'.format(overscan))
         image_data = image_data[:, 20:-20] - overscan
 
     return header, image_data
 
 
 def build_image((i, input_fname), outdir, median_behaviour,
-                frame_min=0.8, frame_max=1.2, nimages=None,
-                resize_factor=None, include_increment=True):
+                frame_min=0.8,
+                frame_max=1.2,
+                nimages=None,
+                resize_factor=None,
+                include_increment=True):
     '''
     Given a file, render a png of the output to the ``outdir`` directory.
 
@@ -160,13 +161,14 @@ def build_image((i, input_fname), outdir, median_behaviour,
     fig = plt.figure(figsize=(8, 8))
 
     if no_time_series:
-        axes = [fig.add_subplot(111), ]
+        axes = [fig.add_subplot(111),]
     else:
         # Get around not having plt.subplots in matplotlib versions < 1.4
-        axes = [
-            plt.subplot2grid((4, 4), (0, 0), colspan=3, rowspan=3),
-            plt.subplot2grid((4, 4), (3, 0), colspan=3),
-        ]
+        axes = [plt.subplot2grid((4, 4), (0, 0),
+                                 colspan=3,
+                                 rowspan=3),
+                plt.subplot2grid((4, 4), (3, 0),
+                                 colspan=3),]
 
     header, image_data = extract_image_data(input_fname)
 
@@ -174,8 +176,8 @@ def build_image((i, input_fname), outdir, median_behaviour,
         if resize_factor not in ALLOWED_RESIZE_FACTORS:
             raise RuntimeError("Invalid resize factor given, allowed: {allowed}".format(
                 allowed=ALLOWED_RESIZE_FACTORS))
-        new_shape = (image_data.shape[0] // resize_factor,
-                image_data.shape[1] // resize_factor)
+        new_shape = (image_data.shape[0] // resize_factor, image_data.shape[1] //
+                     resize_factor)
         image_data = rebin(image_data, new_shape)
 
     med_image = np.median(image_data)
@@ -183,8 +185,12 @@ def build_image((i, input_fname), outdir, median_behaviour,
     if z1 > z2:
         z1, z2 = z2, z1
 
-    axes[0].imshow(image_data, interpolation='None', origin='lower',
-                   cmap=plt.cm.afmhot, vmin=z1, vmax=z2)
+    axes[0].imshow(image_data,
+                   interpolation='None',
+                   origin='lower',
+                   cmap=plt.cm.afmhot,
+                   vmin=z1,
+                   vmax=z2)
     for dimension in ['xaxis', 'yaxis']:
         getattr(axes[0], dimension).set_visible(False)
     axes[0].set_title(header.get('image_id', None))
@@ -209,8 +215,7 @@ def sort_images(images):
     return sorted(images, key=lambda fname: fits.getheader(fname)['mjd'])
 
 
-def generate_movie(image_directory, output_filename, fps=15,
-                   use_mencoder=False):
+def generate_movie(image_directory, output_filename, fps=15, use_mencoder=False):
     '''
     Render a mp4 movie from a directory of png files. Use ffmpeg for this.
 
@@ -228,30 +233,22 @@ def generate_movie(image_directory, output_filename, fps=15,
     '''
     output_filename = os.path.realpath(output_filename)
 
-    logger.info('Building movie file {}, fps {}'.format(
-        output_filename, fps)
-    )
+    logger.info('Building movie file {}, fps {}'.format(output_filename, fps))
     n_cpu = mp.cpu_count()
     with change_directory(image_directory):
         if use_mencoder:
             cmd = list(map(str, [
                 'mencoder', 'mf://*.png', '-mf',
-                'w=800:h=600:fps={}:type=png'.format(fps),
-                '-ovc', 'x264', '-x264encopts',
+                'w=800:h=600:fps={}:type=png'.format(fps), '-ovc', 'x264',
+                '-x264encopts',
                 'crf=18:nofast_pskip:nodct_decimate:nocabac:global_header:threads={}'.format(
-                    n_cpu),
-                '-of', 'lavf', '-lavfopts', 'format=mp4',
-                '-o', output_filename
+                    n_cpu), '-of', 'lavf', '-lavfopts', 'format=mp4', '-o',
+                output_filename
             ]))
         else:
-            cmd = list(map(str, [
-                'ffmpeg', '-y',
-                '-framerate', fps,
-                '-pattern_type', 'glob', '-i', '*.png',
-                '-c:v', 'mpeg4',
-                '-b:v', '16M',
-                '-threads', n_cpu, output_filename
-            ]))
+            cmd = list(map(str, ['ffmpeg', '-y', '-framerate', fps, '-pattern_type',
+                                 'glob', '-i', '*.png', '-c:v', 'mpeg4', '-b:v', '16M',
+                                 '-threads', n_cpu, output_filename]))
 
         logger.debug('Running command %s', ' '.join(cmd))
         sp.check_call(cmd)
@@ -271,8 +268,7 @@ def ensure_dir(d, clobber=True):
 
 
 @contextmanager
-def temporary_directory(images_dir=None, delete=True, clobber=True,
-                        *args, **kwargs):
+def temporary_directory(images_dir=None, delete=True, clobber=True, *args, **kwargs):
     '''
     Create either a temporary directory which is removed after use, or ensuring
     a custom directory exists if passed. Args and kwargs are passed on to
@@ -315,8 +311,16 @@ def change_directory(path):
         os.chdir(old_cwd)
 
 
-class TimeSeries(object):
+def _extract(fname):
+    '''
+    Extract the mjd and median of each image
+    '''
+    header, image_data = extract_image_data(fname)
+    med_image = np.median(image_data)
+    return header['mjd'], med_image
 
+
+class TimeSeries(object):
     '''
     Object to store a time series, and plot itself.
     '''
@@ -331,16 +335,11 @@ class TimeSeries(object):
         '''
         Build a ``TimeSeries`` object from a series of fits files.
         '''
-        x = np.zeros(len(files))
-        y = np.zeros(len(files))
+        pool = threadmp.Pool()
 
-        for i, fname in enumerate(files):
-            header, image_data = extract_image_data(fname)
-            med_image = np.median(image_data)
-            x[i] = header['mjd']
-            y[i] = med_image
-
-        return cls(x, y)
+        x, y = map(np.array, zip(*pool.map(_extract, files)))
+        ind = x.argsort()
+        return cls(x[ind], y[ind])
 
     @property
     def ylims(self):
@@ -359,12 +358,19 @@ class TimeSeries(object):
         axis.axvline(self.x[index], color='k', ls='--')
 
 
-def create_movie(files, output_movie=None, images_directory=None,
-                 delete_tempdir=True, sort=True, multiprocess=True, fps=15,
-                 use_mencoder=False, no_time_series=False,
+def create_movie(files,
+                 output_movie=None,
+                 images_directory=None,
+                 delete_tempdir=True,
+                 sort=True,
+                 multiprocess=True,
+                 fps=15,
+                 use_mencoder=False,
+                 no_time_series=False,
                  clobber_images_directory=True,
                  resize_factor=None,
-                 include_increment=True, verbose=False):
+                 include_increment=True,
+                 verbose=False):
     '''
     Build a movie out of a series of fits files.
 
@@ -427,12 +433,14 @@ def create_movie(files, output_movie=None, images_directory=None,
         logger.info('Extracting time series from data')
         if not no_time_series:
             median_behaviour = TimeSeries.extract_from(sorted_files)
+
         else:
             median_behaviour = None
 
         logger.info('Building movie images')
         pool = mp.Pool() if multiprocess else NullPool()
-        fn = partial(build_image, outdir=image_dir,
+        fn = partial(build_image,
+                     outdir=image_dir,
                      median_behaviour=median_behaviour,
                      include_increment=include_increment,
                      resize_factor=resize_factor,
@@ -441,7 +449,8 @@ def create_movie(files, output_movie=None, images_directory=None,
 
         if output_movie is not None:
             output_filename = os.path.realpath(output_movie)
-            generate_movie(image_dir, output_filename, fps=fps,
+            generate_movie(image_dir, output_filename,
+                           fps=fps,
                            use_mencoder=use_mencoder)
 
 
@@ -450,20 +459,18 @@ def main(args):
     Main script access when calling from the command line. Just take
     the arguments object from argparse and convert to function arguments
     '''
-    create_movie(
-        files=args.filename,
-        output_movie=args.output,
-        images_directory=args.images_dir,
-        sort=not args.no_sort,
-        multiprocess=not args.no_multiprocessing,
-        delete_tempdir=not args.no_delete_tmpdir,
-        use_mencoder=args.use_mencoder,
-        no_time_series=args.no_time_series,
-        include_increment=not args.no_include_increment,
-        clobber_images_directory=not args.no_clobber_images_dir,
-        resize_factor=args.resize,
-        verbose=args.verbose,
-    )
+    create_movie(files=args.filename,
+                 output_movie=args.output,
+                 images_directory=args.images_dir,
+                 sort=not args.no_sort,
+                 multiprocess=not args.no_multiprocessing,
+                 delete_tempdir=not args.no_delete_tmpdir,
+                 use_mencoder=args.use_mencoder,
+                 no_time_series=args.no_time_series,
+                 include_increment=not args.no_include_increment,
+                 clobber_images_directory=not args.no_clobber_images_dir,
+                 resize_factor=args.resize,
+                 verbose=args.verbose,)
 
 
 def parse_args():
@@ -473,33 +480,51 @@ def parse_args():
     '''
     parser = argparse.ArgumentParser()
     parser.add_argument('filename', nargs='+')
-    parser.add_argument('-o', '--output', help="Output movie name",
-                        required=False)
-    parser.add_argument('--no-sort', action='store_true', default=False,
+    parser.add_argument('-o', '--output', help="Output movie name", required=False)
+    parser.add_argument('--no-sort',
+                        action='store_true',
+                        default=False,
                         help='Do not sort by mjd')
-    parser.add_argument('-f', '--fps', help='Frames per second',
-                        required=False, default=15, type=int)
-    parser.add_argument('--no-multiprocessing', help='Run serially',
-                        action='store_true', default=False)
-    parser.add_argument('-d', '--images-dir', required=False,
+    parser.add_argument('-f', '--fps',
+                        help='Frames per second',
+                        required=False,
+                        default=15,
+                        type=int)
+    parser.add_argument('--no-multiprocessing',
+                        help='Run serially',
+                        action='store_true',
+                        default=False)
+    parser.add_argument('-d', '--images-dir',
+                        required=False,
                         help='Custom directory to put the intermediate images')
-    parser.add_argument('--no-delete-tmpdir', action='store_true',
+    parser.add_argument('--no-delete-tmpdir',
+                        action='store_true',
                         default=False,
                         help='Do not delete temporary directory of pngs')
-    parser.add_argument('--use-mencoder', action='store_true',
-                        default=False, help='Use mencoder instead of ffmpeg')
-    parser.add_argument('--verbose', action='store_true', default=False,
+    parser.add_argument('--use-mencoder',
+                        action='store_true',
+                        default=False,
+                        help='Use mencoder instead of ffmpeg')
+    parser.add_argument('--verbose',
+                        action='store_true',
+                        default=False,
                         help='Verbose logging')
-    parser.add_argument('-T', '--no-time-series', action='store_true',
-                        default=False, help='Disable time series plot')
-    parser.add_argument('-I', '--no-include-increment', default=False,
+    parser.add_argument('-T', '--no-time-series',
+                        action='store_true',
+                        default=False,
+                        help='Disable time series plot')
+    parser.add_argument('-I', '--no-include-increment',
+                        default=False,
                         action='store_true',
                         help='Disable increment counter in output filename')
-    parser.add_argument('-C', '--no-clobber-images-dir', default=False,
+    parser.add_argument('-C', '--no-clobber-images-dir',
+                        default=False,
                         action='store_true',
                         help='Do not overwrite images directory')
-    parser.add_argument('-r', '--resize', help='Resize images before rendering',
-                        type=int, choices=sorted(list(ALLOWED_RESIZE_FACTORS)),
+    parser.add_argument('-r', '--resize',
+                        help='Resize images before rendering',
+                        type=int,
+                        choices=sorted(list(ALLOWED_RESIZE_FACTORS)),
                         required=False)
     return parser.parse_args()
 
