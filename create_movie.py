@@ -37,8 +37,18 @@ def open_fits_file(filename):
             with fits.open(uncompressed) as infile:
                 yield infile
     else:
-        with fits.open(uncompressed) as infile:
+        with fits.open(filename) as infile:
             yield infile
+
+
+def getheader(filename, hdu=0):
+    with open_fits_file(filename) as infile:
+        return infile[hdu].header
+
+
+def getdata(filename, hdu=0):
+    with open_fits_file(filename) as infile:
+        return infile[hdu].data
 
 
 class NullPool(object):
@@ -111,7 +121,7 @@ def extract_image_data(input_fname):
     :param input_fname:
         Input filename
     '''
-    with fits.open(input_fname) as infile:
+    with open_fits_file(input_fname) as infile:
         image_data = infile[0].data
         header = infile[0].header
 
@@ -224,7 +234,7 @@ def sort_images(images):
         List of images to sort
     '''
     logger.info('Sorting images by mjd')
-    return sorted(images, key=lambda fname: fits.getheader(fname)['mjd'])
+    return sorted(images, key=lambda fname: getheader(fname)['mjd'])
 
 
 def generate_movie(image_directory, output_filename, fps=15, use_mencoder=False):
