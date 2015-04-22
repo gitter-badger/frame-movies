@@ -9,6 +9,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import os
 import multiprocessing as mp
+import multiprocessing.dummy as threadmp
 import tempfile
 from contextlib import contextmanager
 from functools import partial
@@ -315,8 +316,16 @@ def change_directory(path):
         os.chdir(old_cwd)
 
 
-class TimeSeries(object):
+def _extract(fname):
+    '''
+    Extract the mjd and median of each image
+    '''
+    header, image_data = extract_image_data(fname)
+    med_image = np.median(image_data)
+    return header['mjd'], med_image
 
+
+class TimeSeries(object):
     '''
     Object to store a time series, and plot itself.
     '''
@@ -331,16 +340,11 @@ class TimeSeries(object):
         '''
         Build a ``TimeSeries`` object from a series of fits files.
         '''
-        x = np.zeros(len(files))
-        y = np.zeros(len(files))
+        pool = threadmp.Pool()
 
-        for i, fname in enumerate(files):
-            header, image_data = extract_image_data(fname)
-            med_image = np.median(image_data)
-            x[i] = header['mjd']
-            y[i] = med_image
-
-        return cls(x, y)
+        x, y = map(np.array, zip(*pool.map(_extract, files)))
+        ind = x.argsort()
+        return cls(x[ind], y[ind])
 
     @property
     def ylims(self):
