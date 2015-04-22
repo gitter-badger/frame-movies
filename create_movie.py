@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import os
 import multiprocessing as mp
 import multiprocessing.dummy as threadmp
+import bz2
 import tempfile
 from contextlib import contextmanager
 from functools import partial
@@ -27,6 +28,17 @@ mplogger = mp.log_to_stderr()
 mplogger.setLevel('WARNING')
 
 ALLOWED_RESIZE_FACTORS = {2, 4, 8}
+
+
+@contextmanager
+def open_fits_file(filename):
+    if filename.endswith('.bz2'):
+        with bz2.BZ2File(filename) as uncompressed:
+            with fits.open(uncompressed) as infile:
+                yield infile
+    else:
+        with fits.open(uncompressed) as infile:
+            yield infile
 
 
 class NullPool(object):
