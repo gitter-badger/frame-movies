@@ -330,7 +330,7 @@ def make_montage(movie_dir,das):
 		logger.debug("[%d/%d] %s" % (i+1,run_len,files))
 		
 		# now montage them together
-		comm="montage %s -tile 6x2 -geometry 400x300-80+3 tiled_%05d.png" % (files,i)
+		comm="/usr/local/bin/montage %s -tile 6x2 -geometry 400x300-80+3 tiled_%05d.png" % (files,i)
 		logger.debug(comm)
 		os.system(comm)
 
