@@ -107,7 +107,7 @@ def ArgParse():
 
 def getDasLoc():
 	for i in das:
-		s=os.popen('ngwhereis %d' % (i)).readline()
+		s=os.popen('/usr/local/paladin/bin/ngwhereis %d' % (i)).readline()
 		try:
 			das[i]=s.split()[0]
 		except IndexError:
