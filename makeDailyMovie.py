@@ -348,6 +348,7 @@ def make_movie(movie_dir,movie):
 
 def main():	
 	args=ArgParse()
+	getDasLoc()
 	
 	# get time of start
 	t1=datetime.datetime.utcnow()
