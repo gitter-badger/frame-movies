@@ -9,6 +9,7 @@
 #	20150319	v1.0	Code written                                          #
 #   20150321	v1.1	Added montaging + logger                              #
 #   20150321	v1.2	Added spltting of png making                          #
+#   20150424	v1.3	Added ngwhereis and timer                             #
 #                                                                             #
 ###############################################################################
 #
@@ -21,8 +22,7 @@
 #		steps 3+4 happen on one aux node
 #
 # to do: 
-#	use ngwhereis for the das locations
-#	add a timer for the whole process
+#	install bz2 at paranal
 #
 
 import os, os.path, datetime, sys, time
