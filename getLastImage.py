@@ -128,7 +128,7 @@ for cam in cams:
 						f3.write(pngfile)
 						f3.close()
 						logger.info('last_img.log updated with %s' % pngfile)
-						os.system('rm %s' % (pngfile))
+						os.system('/bin/rm %s' % (pngfile))
 						logger.info('Removing %s' % pngfile)
 						
 					else:
@@ -137,7 +137,10 @@ for cam in cams:
 						
 					os.chdir(here)
 					logger.info('Moving to %s' % (here))
-			
+				
+				else:
+					logger.info('%s exists already, skipping...' % (pngfile))
+				
 			else:
 				logger.info("No new fits images to convert, skipping %s..." % (das[cam]))
 			
