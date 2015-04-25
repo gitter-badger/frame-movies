@@ -56,11 +56,11 @@ cams={801:[],
 # where is the camera now, use that das machine?
 # cam/das map
 das={801:None,
-	802:"das06",
-	803:"das09",
-	804:"das04",
+	802:None,
+	803:None,
+	804:None,
 	805:None,
-	806:"das02",
+	806:None,
 	807:None,
 	808:None,
 	809:None,
@@ -69,6 +69,16 @@ das={801:None,
 	812:None,
 	813:None,
 	899:None}
+
+def getDasLoc():
+	for i in das:
+		s=os.popen('/usr/local/paladin/bin/ngwhereis %d' % (i)).readline()
+		try:
+			das[i]=s.split()[0]
+		except IndexError:
+			das[i]=None
+
+getDasLoc()
 	
 # connect to database
 conn=pymysql.connect(host='ds',db='ngts_ops')
