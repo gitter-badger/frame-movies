@@ -77,7 +77,8 @@ def getDasLoc():
 			das[i]=s.split()[0]
 		except IndexError:
 			das[i]=None
-
+		print s
+		
 getDasLoc()
 	
 # connect to database
