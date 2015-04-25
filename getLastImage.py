@@ -128,9 +128,7 @@ for cam in cams:
 						f3.write(pngfile)
 						f3.close()
 						logger.info('last_img.log updated with %s' % pngfile)
-						os.system('/bin/rm %s' % (pngfile))
-						logger.info('Removing %s' % pngfile)
-						
+												
 					else:
 						print "Last image already up to date, skipping..."
 						logger.info('Last image up to date')
