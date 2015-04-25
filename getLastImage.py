@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/local/python/bin/python
 ###############################################################################
 #                                                                             #
 #          Script to get the last image from NGTS and display on webpage      #
