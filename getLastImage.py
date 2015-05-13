@@ -86,13 +86,16 @@ conn=pymysql.connect(host='ds',db='ngts_ops')
 cur=conn.cursor()
 		
 # get the actions from yesterday
-qry="SELECT action_id,camera_id,action FROM action_list WHERE schedule_start_utc BETWEEN date_sub(now(), INTERVAL 1 DAY) AND now()"
+#qry="SELECT action_id,camera_id,action FROM action_list WHERE schedule_start_utc BETWEEN date_sub(now(), INTERVAL 1 DAY) AND now()"
+#cur.execute(qry)
+
+qry="SELECT image_id,camera_id,raw_image_list.action_id,action FROM raw_image_list LEFT JOIN action_list USING (action_id) WHERE camera_id=%s ORDER BY image_id DESC LIMIT 1 "
 cur.execute(qry)
 			
 # get the action ids for each camera (and dome 899)
 for row in cur:
-	if row[2] != 'stow':
-		cams[row[1]].append("action%s_%s" % (row[0],row[2]))
+	if row[3] != 'stow':
+		cams[row[1]].append("action%s_%s" % (row[2],row[3]))
 
 os.chdir(topdir)	
 for cam in cams:
