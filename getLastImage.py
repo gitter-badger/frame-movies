@@ -91,7 +91,7 @@ cur=conn.cursor()
 
 os.chdir(topdir)	
 for cam in cams:
-	qry="SELECT image_id,camera_id,raw_image_list.action_id,action FROM raw_image_list LEFT JOIN action_list USING (action_id) WHERE camera_id=%d ORDER BY image_id DESC LIMIT 1 " % (cam)
+	qry="SELECT image_id,raw_image_list.camera_id,raw_image_list.action_id,action FROM raw_image_list LEFT JOIN action_list USING (action_id) WHERE camera_id=%d ORDER BY image_id DESC LIMIT 1 " % (cam)
 	cur.execute(qry)
 	
 	# get the action ids for each camera (and dome 899)
