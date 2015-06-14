@@ -72,12 +72,13 @@ das={801:None,
 
 def getDasLoc():
 	for i in das:
-		s=os.popen('/usr/local/paladin/bin/ngwhereis %d' % (i)).readline()
-		try:
-			das[i]=s.split()[0]
-		except IndexError:
-			das[i]=None
-		print s
+		if i != 899:
+			s=os.popen('/usr/local/paladin/bin/ngwhereis %d' % (i)).readline()
+			try:
+				das[i]=s.split()[0]
+			except IndexError:
+				das[i]=None
+			print s
 		
 getDasLoc()
 
