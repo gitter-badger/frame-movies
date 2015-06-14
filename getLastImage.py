@@ -85,7 +85,7 @@ getDasLoc()
 cont=0
 for i in das:
 	if das[i]:
-		x=popen('ping -w 0.2 -c 1 %s').readlines()
+		x=os.popen('ping -w 0.2 -c 1 %s').readlines()
 		if ' 0% packet loss' in x[-2]:
 			cont+=0
 		else:
