@@ -80,6 +80,20 @@ def getDasLoc():
 		print s
 		
 getDasLoc()
+
+# check all machines are up
+cont=0
+for i in das:
+	if das[i]:
+		x=popen('ping -w 0.2 -c 1 %s').readlines()
+		if ' 0% packet loss' in x[-2]:
+			cont+=0
+		else:
+			cont+=1
+			
+if cont > 0:
+	logger.fatal("MACHINES ARE DOWN - ignoring image generation (NFS issues)")
+	sys.exit(1)
 	
 # connect to database
 conn=pymysql.connect(host='ds',db='ngts_ops')
