@@ -105,13 +105,17 @@ def ArgParse():
 	args=parser.parse_args()
 	return args
 
+
 def getDasLoc():
 	for i in das:
-		s=os.popen('/usr/local/paladin/bin/ngwhereis %d' % (i)).readline()
-		try:
-			das[i]=s.split()[0]
-		except IndexError:
-			das[i]=None
+		if i != 899:
+			s=os.popen('/usr/local/paladin/bin/ngwhereis %d' % (i)).readline()
+			try:
+				das[i]=s.split()[0]
+			except IndexError:
+				das[i]=None
+			print s
+
 
 def make_pngs(clist):
 	'''
@@ -161,8 +165,7 @@ def make_pngs(clist):
 				logger.warn('No images for %d' % (i))
 		else:
 			continue
-			
-		
+					
 
 def getDatetime(t):
 	'''
@@ -349,6 +352,20 @@ def make_movie(movie_dir,movie):
 def main():	
 	args=ArgParse()
 	getDasLoc()
+	
+	# check all machines are up
+	cont=0
+	for i in das:
+		if das[i]:
+			x=os.popen('ping -w 0.2 -c 1 %s' % (das[i])).readlines()
+			if ' 0% packet loss' in x[-2]:
+				cont+=0
+			else:
+				cont+=1
+				
+	if cont > 0:
+		logger.fatal("MACHINES ARE DOWN - ignoring image generation (NFS issues)")
+		sys.exit(1)
 	
 	# get time of start
 	t1=datetime.datetime.utcnow()
