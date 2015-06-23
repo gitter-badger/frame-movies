@@ -160,7 +160,8 @@ def make_pngs(clist):
 					t=sorted(g.glob('%s%s/%s/*.fits' % (top_dir,das[i],j)))
 					
 					camera_movie_dir=movie_dir+das[i]
-					create_movie(t,images_directory=camera_movie_dir,include_increment=False,clobber_images_directory=False,resize_factor=4)
+					create_movie(t,images_directory=camera_movie_dir,include_increment=False,
+						clobber_images_directory=False,resize_factor=4)
 			else:
 				logger.warn('No images for %d' % (i))
 		else:
@@ -206,7 +207,9 @@ def make_montage(movie_dir,das):
 	# scan all folders looking for 
 	# earliest image of the night
 	##############################
-
+	
+	noimages=0
+	
 	for i in das:
 		if das[i] != None:
 			os.chdir(das[i])
@@ -222,9 +225,16 @@ def make_montage(movie_dir,das):
 			t_refs.append(x)
 			imlens.append(len(t))
 			das_tracker.append(das[i])
+			noimages+=1
 			
 			os.chdir('../')
 			logger.info("Moving to: " + os.getcwd())
+	
+	# check for no data
+	# exit if so
+	if noimages == 0:
+		logger.fatal("No pngs found, exiting...")
+		sys.exit(1)
 	
 	# list of earliest times per camera
 	# and length of imaging run		
