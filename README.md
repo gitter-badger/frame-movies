@@ -1,5 +1,7 @@
 # Frame movies
 
+[![Join the chat at https://gitter.im/NGTS/frame-movies](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/NGTS/frame-movies?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 This code takes a series of FITS files on the command line and spits out a `.mp4`.
 
 It automatically scales the images to `+=20%` around the median and plots a time series of the median values as a function of time. Above the image is the `image_id` if present.
